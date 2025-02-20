@@ -59,7 +59,7 @@ const LandingPage = () => {
       {/* CTA Section */}
       <div className="text-center py-10">
         <h2 className="text-2xl font-semibold">Start Booking Now!</h2>
-        <Link to="/booking">
+        <Link to="/vehicles">
           <button className="bg-green-600 text-white px-6 py-2 rounded mt-4">
             Book a Vehicle
           </button>
