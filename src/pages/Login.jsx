@@ -1,16 +1,24 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-const Login = ({ setIsAuthenticated }) => {
+const Login = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
-    localStorage.setItem("user", email);
-    setIsAuthenticated(true);
+    
+    // Simulate backend response (replace with API call later)
+    const userData = {
+      email,
+      role: email.includes("owner") ? "vehicle_owner" : "farmer", // Temporary role logic
+    };
+
+    login(userData);
     navigate("/");
   };
 

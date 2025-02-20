@@ -1,27 +1,44 @@
-import React, { createContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-export const AuthContext = createContext();
+// Create AuthContext
+const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+// AuthProvider component
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null); // Stores user info
+  const [role, setRole] = useState(null); // "farmer" or "owner"
 
-  const login = (email, password) => {
-    setUser({ email }); // Mock login (Replace with API call)
+  // Simulate fetching user data (replace with real API call)
+  useEffect(() => {
+    const loggedInUser = JSON.parse(localStorage.getItem("user")); // Fetch user from storage
+    if (loggedInUser) {
+      setUser(loggedInUser);
+      setRole(loggedInUser.role); // Set role dynamically
+    }
+  }, []);
+
+  // Function to log in a user
+  const login = (userData) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+    setRole(userData.role);
   };
 
-  const signup = (name, email, password) => {
-    setUser({ name, email }); // Mock signup (Replace with API call)
-  };
-
+  // Function to log out user
   const logout = () => {
+    localStorage.removeItem("user");
     setUser(null);
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthProvider;
+// Custom hook to use AuthContext
+export const useAuth = () => {
+  return useContext(AuthContext);
+};

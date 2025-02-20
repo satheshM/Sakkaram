@@ -12,6 +12,11 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import MyVehicles from "./pages/MyVehicles";
+import Earnings from "./pages/Earnings";
+import OwnerBookings from "./pages/OwnerBookings";
+import ProtectedRoute from "./routes/ProtectedRoute"
+
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -34,6 +39,10 @@ const App = () => {
           <Route path="/vehicles" element={<VehicleList />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/my-vehicles" element={<MyVehicles />} />
+        <Route path="/earnings" element={<Earnings />} />
+        <Route path="/owner-bookings" element={<OwnerBookings />} />
+     
         </Routes>
       </div>
       <Footer />

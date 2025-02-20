@@ -1,17 +1,20 @@
-
 // src/pages/Signup.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-const Signup = ({ setIsAuthenticated }) => {
+const Signup = () => {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("farmer"); // Default role: Farmer
   const navigate = useNavigate();
 
   const handleSignup = (e) => {
     e.preventDefault();
-    localStorage.setItem("user", email);
-    setIsAuthenticated(true);
+
+    const userData = { email, role };
+    login(userData);
     navigate("/");
   };
 
@@ -35,7 +38,23 @@ const Signup = ({ setIsAuthenticated }) => {
           className="w-full p-2 mb-3 border rounded"
           required
         />
-        <button type="submit" className="bg-green-500 text-white w-full p-2 rounded">Sign Up</button>
+
+        {/* Role Selection */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1">Select Role:</label>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="w-full p-2 border rounded"
+          >
+            <option value="farmer">Farmer</option>
+            <option value="vehicle_owner">Vehicle Owner</option>
+          </select>
+        </div>
+
+        <button type="submit" className="bg-green-500 text-white w-full p-2 rounded">
+          Sign Up
+        </button>
       </form>
     </div>
   );

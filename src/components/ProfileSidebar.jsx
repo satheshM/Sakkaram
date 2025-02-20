@@ -1,24 +1,33 @@
 import React from "react";
-import { FaUser, FaHistory, FaWallet, FaGift, FaHeadset, FaCog, FaSignOutAlt, FaTractor, FaChartLine, FaTruck } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { 
+  FaUser, FaHistory, FaWallet, FaGift, 
+  FaHeadset, FaCog, FaSignOutAlt, FaTractor, 
+  FaChartLine, FaTruck 
+} from "react-icons/fa";
+import { useAuth } from "../context/AuthContext"; // Import Auth Context
 
-const ProfileSidebar = ({ role }) => {
+const ProfileSidebar = () => {
+  const navigate = useNavigate();
+  const { role, user, logout } = useAuth(); // Get user data
+
   // Define menu options based on role
   const menuOptions = role === "farmer"
     ? [
-        { icon: FaHistory, text: "Booking History" },
-        { icon: FaTractor, text: "My Vehicles" },
-        { icon: FaWallet, text: "Wallet & Payments" },
-        { icon: FaGift, text: "Rewards & Discounts" },
-        { icon: FaHeadset, text: "Help & Support" },
-        { icon: FaCog, text: "Settings" },
+        { icon: FaHistory, text: "Booking History", path: "/bookings" },
+        { icon: FaTractor, text: "My Vehicles", path: "/my-vehicles" },
+        { icon: FaWallet, text: "Wallet & Payments", path: "/wallet" },
+        { icon: FaGift, text: "Rewards & Discounts", path: "/rewards" },
+        { icon: FaHeadset, text: "Help & Support", path: "/support" },
+        { icon: FaCog, text: "Settings", path: "/settings" },
       ]
     : [
-        { icon: FaChartLine, text: "Earnings & Transactions" },
-        { icon: FaTruck, text: "My Vehicles & Availability" },
-        { icon: FaWallet, text: "Wallet & Payments" },
-        { icon: FaGift, text: "Incentives & Rewards" },
-        { icon: FaHeadset, text: "Help & Support" },
-        { icon: FaCog, text: "Settings" },
+        { icon: FaChartLine, text: "Earnings & Transactions", path: "/earnings" },
+        { icon: FaTruck, text: "My Vehicles & Availability", path: "/my-vehicles" },
+        { icon: FaWallet, text: "Wallet & Payments", path: "/wallet" },
+        { icon: FaGift, text: "Incentives & Rewards", path: "/rewards" },
+        { icon: FaHeadset, text: "Help & Support", path: "/support" },
+        { icon: FaCog, text: "Settings", path: "/settings" },
       ];
 
   return (
@@ -26,29 +35,31 @@ const ProfileSidebar = ({ role }) => {
       {/* Profile Section */}
       <div className="flex flex-col items-center text-center mb-6">
         <img
-          src="../assets/images/farmerdp.jpeg" // Replace with actual user profile picture
-         
+          src={user?.profilePic || "/default-avatar.png"} // Show default if no profile pic
           alt="User"
           className="w-20 h-20 rounded-full border-2 border-green-500"
         />
-        <h2 className="text-xl font-bold mt-3">John Doe</h2>
-        <p className="text-gray-500 text-sm">+91 98765 43210</p>
+        <h2 className="text-xl font-bold mt-3">{user?.name || "Guest User"}</h2>
+        <p className="text-gray-500 text-sm">{user?.phone || "No Phone"}</p>
       </div>
 
       {/* Sidebar Menu */}
       <nav className="space-y-4">
-        {menuOptions.map(({ icon: Icon, text }) => (
-          <ProfileLink key={text} Icon={Icon} text={text} />
+        {menuOptions.map(({ icon: Icon, text, path }) => (
+          <ProfileLink key={text} Icon={Icon} text={text} onClick={() => navigate(path)} />
         ))}
-        <ProfileLink Icon={FaSignOutAlt} text="Logout" className="text-red-500" />
+        <ProfileLink Icon={FaSignOutAlt} text="Logout" className="text-red-500" onClick={logout} />
       </nav>
     </div>
   );
 };
 
 // Reusable Profile Link Component
-const ProfileLink = ({ Icon, text, className }) => (
-  <div className={`flex items-center space-x-3 p-3 hover:bg-gray-200 rounded cursor-pointer ${className}`}>
+const ProfileLink = ({ Icon, text, onClick, className }) => (
+  <div 
+    className={`flex items-center space-x-3 p-3 hover:bg-gray-200 rounded cursor-pointer ${className}`} 
+    onClick={onClick}
+  >
     <Icon className="text-green-500 text-lg" />
     <span className="text-gray-700">{text}</span>
   </div>
