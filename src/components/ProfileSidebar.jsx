@@ -26,7 +26,8 @@ const ProfileSidebar = ({ role }) => {
       {/* Profile Section */}
       <div className="flex flex-col items-center text-center mb-6">
         <img
-          src="https://via.placeholder.com/100" // Replace with actual user profile picture
+          src="../assets/images/farmerdp.jpeg" // Replace with actual user profile picture
+         
           alt="User"
           className="w-20 h-20 rounded-full border-2 border-green-500"
         />

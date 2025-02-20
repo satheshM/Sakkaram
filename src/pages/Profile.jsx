@@ -4,7 +4,7 @@ import ProfileSidebar from "../components/ProfileSidebar";
 
 
 const Profile = () => {
-  const userRole = "farmer"; // Change to "owner" for vehicle owner
+  const userRole = "owner"; // Change to "owner/farmer" for vehicle owner
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
