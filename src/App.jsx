@@ -14,8 +14,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import MyVehicles from "./pages/MyVehicles";
 import Earnings from "./pages/Earnings";
-import OwnerBookings from "./pages/OwnerBookings";
+import OwnerBookings from "./pages/AllBookings";
 import ProtectedRoute from "./routes/ProtectedRoute"
+import AllBookings from "./pages/AllBookings";
 
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
       <div className="flex-grow">
+       
         <Routes>
           <Route path="/" element={isAuthenticated ? <Home /> : <LandingPage />} />
           <Route path="/login" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
@@ -41,7 +43,8 @@ const App = () => {
           <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/my-vehicles" element={<MyVehicles />} />
         <Route path="/earnings" element={<Earnings />} />
-        <Route path="/owner-bookings" element={<OwnerBookings />} />
+        <Route path="/owner-bookings" element={<AllBookings />} />
+
      
         </Routes>
       </div>

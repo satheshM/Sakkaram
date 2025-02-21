@@ -39,14 +39,15 @@ const Navbar = () => {
         <Link to="/" className={`px-3 py-2 rounded ${location.pathname === "/" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
           Home
         </Link>
-        <Link to="/vehicles" className={`px-3 py-2 rounded ${location.pathname === "/vehicles" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
-          Find Vehicles
-        </Link>
+       
 
         {/* Farmer-Specific Links */}
         {role === "farmer" && (
           <>
-            <Link to="/bookings" className={`px-3 py-2 rounded ${location.pathname === "/bookings" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
+           <Link to="/vehicles" className={`px-3 py-2 rounded ${location.pathname === "/vehicles" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
+          Find Vehicles
+        </Link>
+            <Link to="/booking" className={`px-3 py-2 rounded ${location.pathname === "/booking" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
               My Bookings
             </Link>
             <Link to="/wallet" className={`px-3 py-2 rounded ${location.pathname === "/wallet" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
@@ -67,6 +68,10 @@ const Navbar = () => {
             <Link to="/my-vehicles" className={`px-3 py-2 rounded ${location.pathname === "/my-vehicles" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
               My Vehicles
             </Link>
+            <Link to="/owner-bookings" className={`px-3 py-2 rounded ${location.pathname === "/owner-bookings" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
+              Booking
+            </Link>
+
             <Link to="/profile" className={`px-3 py-2 rounded ${location.pathname === "/profile" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
               Profile
             </Link>
