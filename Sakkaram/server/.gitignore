@@ -36,3 +36,6 @@ Thumbs.db
 
 # Git-related
 .git/
+
+#app Logs
+app.log
