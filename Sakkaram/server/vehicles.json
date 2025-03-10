@@ -1,0 +1,56 @@
+[
+  {
+    "id": "c4ba83de-077a-49fc-b4f4-ef0cda456e57",
+    "owner": "Ram Kumar",
+    "ownerId": "56cbdad6-cc3e-4d3e-ac00-24ee111f0376",
+    "type": "Tractor",
+    "model": "Mahindra 5756",
+    "number": "TN-29-AK34-45",
+    "price": 850,
+    "priceUnit": "hour",
+    "location": "Dharmapuri",
+    "features": [
+      "45HP"
+    ],
+    "description": "GoodCondition Ready to work",
+    "available": true,
+    "image": "https://www.mahindratractor.com/sites/default/files/styles/homepage_pslider_472x390_/public/2023-10/sp_plus.webp?itok=KtsUbJib",
+    "createdAt": "2025-03-07T14:21:51.860Z"
+  },
+  {
+    "id": "070bfcbb-a399-4000-9be0-ec120fda0af3",
+    "owner": "Ram Kumar",
+    "ownerId": "56cbdad6-cc3e-4d3e-ac00-24ee111f0376",
+    "type": "Harvester",
+    "model": "John Deere DC-68G",
+    "number": "TN-30-298-394",
+    "price": 1501,
+    "priceUnit": "hour",
+    "location": "Dharmapuri",
+    "features": [
+      "50 HP"
+    ],
+    "description": "Good Condition",
+    "available": true,
+    "image": "https://5.imimg.com/data5/SELLER/Default/2023/3/294199762/CM/LZ/JS/186750549/bicycle-cranks-500x500.png",
+    "createdAt": "2025-03-08T13:03:36.369Z"
+  },
+  {
+    "id": "850381a6-9f57-4c8b-898d-61545d6a2057",
+    "owner": "Ram Kumar",
+    "ownerId": "56cbdad6-cc3e-4d3e-ac00-24ee111f0376",
+    "type": "Harvester",
+    "model": "Mahendra",
+    "number": "TN-00-878-38",
+    "price": 1249,
+    "priceUnit": "hour",
+    "location": "Dharmapuri",
+    "features": [
+      "4 grip"
+    ],
+    "description": "Good Condition",
+    "available": true,
+    "image": "https://5.imimg.com/data5/SELLER/Default/2023/3/294199762/CM/LZ/JS/186750549/bicycle-cranks-500x500.png",
+    "createdAt": "2025-03-09T10:40:00.669Z"
+  }
+]

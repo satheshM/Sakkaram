@@ -1,0 +1,54 @@
+[
+  {
+    "email": "sathesh99@gmail.com",
+    "password": "$2b$10$8lklOPSEoDbEuHtCojl7UO6nnlYJ02QP2roYcJ2XEZsZXLFbYo3S6",
+    "role": "farmer"
+  },
+  {
+    "email": "sathesh@gmail.com",
+    "password": "$2b$10$rpHXwRDfa4d0ItKEzRMFWOWGgpd3THiBkNY4mtaGQStB8T0wpI9/m",
+    "role": "farmer"
+  },
+  {
+    "email": "test@gmail.com",
+    "password": "$2b$10$e7GHCS313a69nRtd9k5v9.5CmvBmIB9Yzvr734/igXY2Lq4Bi.DiG",
+    "role": "farmer",
+    "createdAt": "2025-03-03T11:28:17.733Z"
+  },
+  {
+    "email": "test1@gmail.com",
+    "password": "$2b$10$06PENPN7tyfpjW25lSq6VuFC71P/iJMJ1UXPo1NdFeaSiJisCSVDC",
+    "role": "farmer"
+  },
+  {
+    "email": "test2@gmail.com",
+    "password": "$2b$10$.d5sGBee6ZxLQM/NSTDhyezRUllvQDvtC5t9yx30jMOvIiAWGHIni",
+    "role": "farmer"
+  },
+  {
+    "email": "test5@gmail.com",
+    "password": "$2b$10$S1iuxdGxkrlxZKTvx8CrrOjlGDcnfFkHb33xusA8JjfGeBKHACRFO",
+    "role": "vehicle_owner"
+  },
+  {
+    "email": "test10@gmail.com",
+    "password": "$2b$10$4DIlq0q5pSQmqhY9NvMQL.qV2t7gAiMXPbqTshEUh613CEWRYdsTa",
+    "role": "farmer"
+  },
+  {
+    "email": "testk@gmail.com",
+    "password": "$2b$10$Dt6mvW2kGt618u7n.7QbCePSRexayTAqLEXceEHwtnkqAvpHMAqvC",
+    "role": "farmer"
+  },
+  {
+    "email": "sathesh9@gmail.com",
+    "password": "$2b$10$64K9KK.3azs6l3435u54SuyroZsRf8p28bhesVcpI8tgPnnZvkBnu",
+    "role": "farmer"
+  },
+  {
+    "email": "satheshm@gmail.com",
+    "password": "$2b$10$N9hu1v1IxIHmglHoW17Tt.WHnQm8lYgKK5rrtSy4ggb4S7mFVDkOm",
+    "role": "farmer",
+    "createdAt": 2025
+  }
+]
