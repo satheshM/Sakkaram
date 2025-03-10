@@ -267,21 +267,14 @@ const confirmBooking = async (id) => {
     const response = await UpdateBookingStatus(payload);
 
     if (response.status === 200) {
-      const newOngoing = activeBookings.find(
-        (booking) => booking.id === id
-      );
-      if (newOngoing) {
-        setActiveBookings([
-          ...activeBookings,
-          { ...newOngoing, status: 'Ongoing' },
-        ]);
-        setActiveBookings(
-          activeBookings.filter((booking) =>( booking.status !== 'Confirmed' && booking.id !== id
-          ))
-        );
-      }
-      setSelectedBooking(null);
-    }
+  setActiveBookings((prevBookings) =>
+    prevBookings.map((booking) =>
+      booking.id === id ? { ...booking, status: "Ongoing" } : booking
+    )
+  );
+  setSelectedBooking(null);
+}
+
   };
 
   // Cancel active booking
