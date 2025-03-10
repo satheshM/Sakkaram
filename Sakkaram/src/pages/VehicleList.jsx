@@ -129,6 +129,7 @@ const VehicleList = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [bookingDate, setBookingDate] = useState('');
   const [bookingDuration, setBookingDuration] = useState('1');
+  const [farmerMsg, setfarmerMsg] = useState('');
 
   const transformVehicleData = (backendData) => {
     return backendData.map((vehicle) => ({
@@ -235,7 +236,7 @@ const VehicleList = () => {
     }
 
     const totalPrice = selectedVehicle.price * parseInt(bookingDuration);
-    console.log('useAuthUser');
+  
     const bookingData = {
       //userId, // Replace this with actual user ID from authentication
       vehicleId: selectedVehicle.id,
@@ -250,13 +251,25 @@ const VehicleList = () => {
       totalPrice,
       status: 'Pending',
       owner: selectedVehicle.owner,
+      farmerMsg:farmerMsg,
     };
 
     try {
       const response = await createBooking(bookingData);
+      if(response.status === 201)
+      {
+        alert('Booking confirmed successfully!');
+        setSelectedVehicle(null); // Close modal after booking
+        setBookingDuration(null)
+        setfarmerMsg(null)
+        setBookingDate(null)
 
-      alert('Booking confirmed successfully!');
-      setSelectedVehicle(null); // Close modal after booking
+      }
+      else{
+        console.log("booking failed");
+      }
+
+     
     } catch (error) {
       console.error('Error booking vehicle:', error);
       alert('Something went wrong. Please try again.');
@@ -657,6 +670,27 @@ const VehicleList = () => {
                         <option>Custom</option>
                       </select>
                     </div>
+
+
+                    {/* <div className="mb-6">
+                    <h3 className="font-semibold mb-2">Message to the Owner</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-700">{"sample msg"}</p>
+                    </div>
+                  </div> */}
+                  <h3 className="font-semibold mb-2 text-red-700">
+                      Message to the Owner
+                    </h3>
+                    <textarea
+                      value={farmerMsg}
+                      onChange={(e) => setfarmerMsg(e.target.value)}
+                      placeholder="Send a Message to the Vehicle Owner..."
+                      className="w-full p-2 border border-red-300 rounded-md mb-3"
+                      rows="3"
+                    ></textarea>
+
+
+
                   </div>
                 </div>
 

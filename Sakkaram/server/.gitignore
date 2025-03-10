@@ -1,9 +1,8 @@
-# Node modules (installed packages)
+# Node.js dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
 # Build files
 dist/
@@ -16,27 +15,31 @@ build/
 .env.test.local
 .env.production.local
 
-# Logs
-logs/
-*.log
-yarn.lock
-package-lock.json
-
-# Editor settings
+# Editor files
 .vscode/
 .idea/
 *.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Cache files
 .cache/
 .next/
 out/
+
+# Coverage reports
+coverage/
+
+# Dependency directories
+/.pnp
+.pnp.js
+
+# Misc
 .DS_Store
 Thumbs.db
-
-# Git-related
-.git/
-
-
-# app log
-app.log
