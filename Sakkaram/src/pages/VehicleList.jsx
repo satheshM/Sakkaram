@@ -656,18 +656,18 @@ const VehicleList = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Duration
+                        Duration(Hour's)
                       </label>
                       <select
                         value={bookingDuration}
                         onChange={(e) => setBookingDuration(e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                       >
-                        <option>1 hour</option>
-                        <option>2 hours</option>
-                        <option>4 hours</option>
-                        <option>8 hours (Full day)</option>
-                        <option>Custom</option>
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                      
                       </select>
                     </div>
 
