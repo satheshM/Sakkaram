@@ -528,6 +528,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     totalPrice,
     status,
     image,
+    farmerMsg,
   } = req.body;
   if (!vehicleId || !bookingDate || !duration) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -551,6 +552,7 @@ app.post('/api/bookings', authenticateToken, (req, res) => {
     vehicleType,
     image,
     location,
+    farmerMsg,
     distance,
     pricePerHour,
     bookingDate,
@@ -595,7 +597,8 @@ app.get('/api/user/bookings', authenticateToken, (req, res) => {
         b.farmerId === req.user.id &&
         (b.status === 'Completed' ||
           b.status === 'Cancelled' ||
-          b.status === 'Rejected')
+          b.status === 'Rejected' || 
+          b.status === 'Reviewed')
     ),
   };
 
@@ -614,7 +617,7 @@ app.get('/api/owner/bookings', authenticateToken, (req, res) => {
       (b) => b.ownerId === req.user.id && b.status === 'Pending'
     ),
     activeBookings: Allbookings.filter(
-      (b) => b.ownerId === req.user.id && b.status === 'Ongoing'
+      (b) => b.ownerId === req.user.id && ( b.status === 'Ongoing' ||b.status === 'Confirmed')
     ),
 
     bookingHistory: Allbookings.filter(
@@ -622,7 +625,8 @@ app.get('/api/owner/bookings', authenticateToken, (req, res) => {
         b.ownerId === req.user.id &&
         (b.status === 'Completed' ||
           b.status === 'Cancelled' ||
-          b.status === 'Rejected')
+          b.status === 'Rejected' ||
+          b.status === 'Reviewed')
     ),
   };
   res.json(ownersBooking);

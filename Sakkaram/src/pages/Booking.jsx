@@ -103,7 +103,8 @@ const Booking = () => {
     image: booking.image, // Mapping image
     cancellationReason: booking.cancellationReason || '', // Optional field
     rating: booking.rating || null, // Optional field
-    feedback: booking.feedback || '', // Optional field
+    feedback: booking.feedback || '',
+    farmerMsg:booking.farmerMsg, // Optional field
   });
   useEffect(() => {
     const fetchBookings = async () => {
@@ -466,6 +467,12 @@ const Booking = () => {
                           <p>{selectedBooking.location}</p>
                         </div>
                       </div>
+                       <div className="mb-6">
+                    <h3 className="font-semibold mb-2">Your Message</h3>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <p className="text-gray-700">{selectedBooking.farmerMsg}</p>
+                    </div>
+                  </div>
                     </div>
                   </div>
 

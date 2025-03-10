@@ -64,7 +64,7 @@ const AllBookings = () => {
     rating: booking.rating || 5, // If rating exists, use it; otherwise, null
     feedback: booking.feedback || '', // If feedback exists, use it; otherwise, empty string
     image: booking.image, // Use the vehicle image
-    message: booking.message || 'No Message',
+    message: booking.farmerMsg || 'No Message',
     cancellationReason: booking.cancellationReason || 'no cancelation reason',
   });
 
@@ -435,7 +435,7 @@ const AllBookings = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAction(booking.id, 'reject');
+                            handleAction(booking.id, 'reject','Owner declined the request');
                           }}
                           className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
                           title="Reject"
@@ -684,7 +684,7 @@ const AllBookings = () => {
                     <>
                       <button
                         onClick={() =>
-                          handleAction(selectedBooking.id, 'reject')
+                          handleAction(selectedBooking.id, 'reject','Owner declined the request')
                         }
                         className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
                       >
