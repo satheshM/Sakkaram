@@ -155,7 +155,7 @@ const AllBookings = () => {
 
   const handleAction = async (id, action, reason) => {
     try {
-      const newStatus = action === 'accept' ? 'Ongoing' : 'Rejected';
+      const newStatus = action === 'accept' ? 'Confirmed' : 'Rejected';
 
       // Call API to update booking status
       const updatedStatus = {
@@ -175,7 +175,7 @@ const AllBookings = () => {
           if (acceptedBooking) {
             setActiveBookings((prevBookings) => [
               ...prevBookings,
-              { ...acceptedBooking, status: 'Ongoing' },
+              { ...acceptedBooking, status: 'Confirmed' },
             ]);
           }
         } else {
@@ -203,6 +203,31 @@ const AllBookings = () => {
       );
     }
   };
+// change status to start work
+
+// Mark booking as complete
+const confirmBooking = async (id) => {
+  const payload = {
+    id: id,
+    status: 'Confirmed',
+    cancellationReason: '',
+  };
+  const response = await UpdateBookingStatus(payload);
+
+  if (response.status === 200) {
+    const ongoingBooking = activeBookings.find(
+      (booking) => booking.id === id
+    );
+    if (ongoingBooking) {
+      setActiveBookings([
+        ...activeBookings,
+        { ...ongoingBooking, status: 'Confirmed' },
+      ]);
+      
+    }
+    setSelectedBooking(null);
+  }
+};
 
   // Mark booking as complete
   const completeBooking = async (id) => {
@@ -224,6 +249,35 @@ const AllBookings = () => {
         ]);
         setActiveBookings(
           activeBookings.filter((booking) => booking.id !== id)
+        );
+      }
+      setSelectedBooking(null);
+    }
+  };
+
+
+
+  // Mark booking as complete
+  const OngoingBooking = async (id) => {
+    const payload = {
+      id: id,
+      status: 'Ongoing',
+      cancellationReason: '',
+    };
+    const response = await UpdateBookingStatus(payload);
+
+    if (response.status === 200) {
+      const newOngoing = activeBookings.find(
+        (booking) => booking.id === id
+      );
+      if (newOngoing) {
+        setActiveBookings([
+          ...activeBookings,
+          { ...newOngoing, status: 'Ongoing' },
+        ]);
+        setActiveBookings(
+          activeBookings.filter((booking) =>( booking.status !== 'Confirmed' && booking.id !== id
+          ))
         );
       }
       setSelectedBooking(null);
@@ -269,6 +323,7 @@ const AllBookings = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Ongoing':
+      case 'Confirmed':
         return 'bg-green-100 text-green-800';
       case 'Pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -445,6 +500,29 @@ const AllBookings = () => {
                       </div>
                     )}
 
+                    {booking.status === 'Confirmed' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          OngoingBooking(booking.id);
+                        }}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Mark Ongoing
+                      </button>
+                    )}
+
+                {/* {booking.status === 'Pending' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          confirmBooking(booking.id);
+                        }}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Confirm
+                      </button>
+                    )} */}
                     {booking.status === 'Ongoing' && (
                       <button
                         onClick={(e) => {
@@ -453,7 +531,7 @@ const AllBookings = () => {
                         }}
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
                       >
-                        Mark Complete
+                        Mark as Completed
                       </button>
                     )}
 
@@ -698,7 +776,7 @@ const AllBookings = () => {
                     </>
                   )}
 
-                  {selectedBooking.status === 'Ongoing' && (
+                  {selectedBooking.status === 'Confirmed' && (
                     <>
                       <div>
                         <button
@@ -714,10 +792,10 @@ const AllBookings = () => {
                         </button>
                       </div>
                       <button
-                        onClick={() => completeBooking(selectedBooking.id)}
+                        onClick={() => OngoingBooking(selectedBooking.id)}
                         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
                       >
-                        Mark as Completed
+                        Mark as Ongoing
                       </button>
                     </>
                   )}
