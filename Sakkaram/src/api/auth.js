@@ -58,9 +58,12 @@
 // export const PostProfile = (userData) =>
 //   request('/post_profile', 'POST', userData);
 
+// const API_BASE_URL =
+//   import.meta.env.VITE_API_BASE_URL ||
+//   'https://stackblitzsakkaram-akhj--5000--495c5120.local-credentialless.webcontainer.io/api';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  'https://stackblitzsakkaram-akhj--5000--495c5120.local-credentialless.webcontainer.io/api';
+  'http://localhost:5000/api';
 
 const refreshToken = async () => {
   try {
