@@ -17,7 +17,7 @@ const express = require('express');
 
     // ✅ Environment Variables
     const PORT = process.env.PORT || 5000;
-    const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:517';
+    const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
     const USERS_FILE = process.env.USERS_FILE || 'users1.json';
     const VEHICLES_FILE = process.env.VEHICLES_FILE || 'vehicles.json';
     const BOOKINGS_FILE = process.env.BOOKINGS_FILE || 'bookings.json';
@@ -33,7 +33,7 @@ const express = require('express');
 
     // ✅ Rate Limiting
     const limiter = rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
+      windowMs: 10 * 60 * 1000, // 10 minutes
       max: 100, // Limit each IP to 100 requests per windowMs
       message: 'Too many requests from this IP, please try again after 15 minutes',
       standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
