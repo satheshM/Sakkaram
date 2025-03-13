@@ -10,6 +10,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from 'react-icons/fa';
+import { Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import { GetUserBookings,submitReview as postReview } from '../api/Bookings';
 
@@ -270,12 +271,16 @@ const Booking = () => {
                 : "You don't have any past bookings."}
             </p>
             {activeTab === 'upcoming' && (
-              <a
-                href="/vehicles"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700"
-              >
-                Find Vehicles to Book
-              </a>
+               <div>
+
+              <Link to="/vehicles" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+            
+            <span className="text-sm font-medium">Find Vehicles to Book</span>
+          </Link>
+
+             
+                </div>
+              
             )}
           </div>
         ) : (

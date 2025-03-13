@@ -25,14 +25,14 @@ const App = () => {
 };
 
 const AppContent = () => {
-  const { role } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-grow">
         <Routes>
-          <Route path="/" element={role ? <Home /> : <LandingPage />} />
+          <Route path="/" element={isAuthenticated ? <Home /> : <LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 

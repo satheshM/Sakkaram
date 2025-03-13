@@ -7,8 +7,9 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true); // Set default to true for always-visible menu
-  const { role, logout } = useAuth(); // Get role & logout function
+  const { user, logout,isAuthenticated } = useAuth(); // Get role & logout function
 
+  console.log("LogStatus from navbar"+isAuthenticated)
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const handleLogout = () => {
@@ -42,7 +43,7 @@ const Navbar = () => {
        
 
         {/* Farmer-Specific Links */}
-        {role === "farmer" && (
+        {isAuthenticated && user?.role === "farmer" && (
           <>
            <Link to="/vehicles" className={`px-3 py-2 rounded ${location.pathname === "/vehicles" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
           Find Vehicles
@@ -60,7 +61,10 @@ const Navbar = () => {
         )}
 
         {/* Vehicle Owner-Specific Links */}
-        {role === "vehicle_owner" && (
+        {
+          console.log("navbar role"+user?.role)
+        }
+        {isAuthenticated && user?.role === "vehicle_owner" && (
           <>
             <Link to="/earnings" className={`px-3 py-2 rounded ${location.pathname === "/earnings" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
               Earnings
@@ -79,7 +83,7 @@ const Navbar = () => {
         )}
 
         {/* Authentication */}
-        {role ? (
+        {isAuthenticated ? (
           <>
             <button onClick={handleLogout} className="px-3 py-2 rounded bg-red-500 text-white hover:bg-red-600">
               Logout
