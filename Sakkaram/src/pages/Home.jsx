@@ -7,9 +7,9 @@ const Home = () => {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [stats, setStats] = useState({
-    bookings: user.role === "farmer" ? 3 : 8,
-    earnings: user.role === "farmer" ? 0 : 12500,
-    vehicles: user.role === "farmer" ? 0 : 3,
+    earnings: user?.role === "farmer" ? 0 : 12500,
+    bookings: user?.role === "farmer" ? 3 : 8,
+    vehicles: user?.role === "farmer" ? 0 : 3,
     notifications: 2
   });
 
@@ -323,7 +323,7 @@ const Home = () => {
               <FaWallet className="text-purple-600 text-xl" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{user.role === "farmer" ? "Wallet Balance" : "Earnings"}</p>
+              <p className="text-sm text-gray-500">{user?.role === "farmer" ? "Wallet Balance" : "Earnings"}</p>
               <p className="text-xl font-bold">₹{stats.earnings.toLocaleString()}</p>
             </div>
           </div>
@@ -342,7 +342,7 @@ const Home = () => {
         </div>
 
         {/* Render dashboard based on user user.role */}
-        {user.role === "farmer" ? <FarmerDashboard /> : <OwnerDashboard />}
+        {user?.role === "farmer" ? <FarmerDashboard /> : <OwnerDashboard />}
       </div>
     </div>
   );

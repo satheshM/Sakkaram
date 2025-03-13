@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { registerUser } from "../api/auth";
 import { FaEnvelope, FaLock, FaUserPlus, FaTractor, FaUser } from "react-icons/fa";
 
 const Signup = () => {
-  const { login } = useAuth();
+  const { login,isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -13,6 +13,14 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+
+   // Redirect if already authenticated
+   useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -36,6 +44,8 @@ const Signup = () => {
       // Register the user
       const response = await registerUser(email, password, role);
       const userData = await response
+
+      console.log("After signup"+JSON.stringify(response))
       
       if (response.status === 201) {
         // Log the user in after successful registration

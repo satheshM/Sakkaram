@@ -43,7 +43,7 @@ const Navbar = () => {
        
 
         {/* Farmer-Specific Links */}
-        {isAuthenticated && user.role === "farmer" && (
+        {isAuthenticated && user?.role === "farmer" && (
           <>
            <Link to="/vehicles" className={`px-3 py-2 rounded ${location.pathname === "/vehicles" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
           Find Vehicles
@@ -61,7 +61,10 @@ const Navbar = () => {
         )}
 
         {/* Vehicle Owner-Specific Links */}
-        {isAuthenticated && user.role === "vehicle_owner" && (
+        {
+          console.log("navbar role"+user?.role)
+        }
+        {isAuthenticated && user?.role === "vehicle_owner" && (
           <>
             <Link to="/earnings" className={`px-3 py-2 rounded ${location.pathname === "/earnings" ? "bg-green-500 text-black" : "hover:text-green-400"}`}>
               Earnings
