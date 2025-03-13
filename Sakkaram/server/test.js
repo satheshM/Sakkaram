@@ -127,6 +127,31 @@ const express = require('express');
 
     // ✅ Routes
 
+// 🔹 Verify Token Route
+app.get('/api/verify-token', (req, res) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    logger.warn('Unauthorized: No token provided');
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      logger.error('Invalid or expired token');
+      return res.status(403).json({ message: 'Forbidden: Invalid or expired token' });
+    }
+
+    logger.info(`Token verified for user: ${decoded.email}`);
+    res.json({ message: 'Token is valid', user: decoded });
+  });
+});
+
+
+
+
+
+
     // 🔹 Signup Route
     app.post(
       '/api/signup',

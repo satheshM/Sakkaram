@@ -61,6 +61,9 @@
 // const API_BASE_URL =
 //   import.meta.env.VITE_API_BASE_URL ||
 //   'https://stackblitzsakkaram-akhj--5000--495c5120.local-credentialless.webcontainer.io/api';
+
+
+
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   'http://localhost:5000/api';
@@ -89,7 +92,7 @@ const refreshToken = async () => {
 
 export const request = async (endpoint, method, body, retry = true) => {
   try {
-    console.log('API Base URL:', API_BASE_URL);
+    console.log('API Call:', API_BASE_URL+endpoint);
 
     //const accessToken = localStorage.getItem('accessToken');
 
@@ -110,6 +113,7 @@ export const request = async (endpoint, method, body, retry = true) => {
 
       if (!newAccessToken.ok) {
         console.log(`Refresh Token Failed: ${newAccessToken.status}`);
+        return  newAccessToken;
       }
 
       if (newAccessToken.status === 200) {
@@ -117,7 +121,9 @@ export const request = async (endpoint, method, body, retry = true) => {
         return request(endpoint, method, body, false); // Retry request with new token
       } else {
         console.error('Refresh token failed, logging out user.');
-        logoutUser(); // Logout if refresh token fails
+        return  newAccessToken;
+         // Logout if refresh token fails
+       
       }
     }
 
@@ -141,19 +147,44 @@ export const loginUser = async (email, password) => {
 
 export const registerUser = async (email, password, role) => {
   const userData = await request('/signup', 'POST', { email, password, role });
-  if (userData) {
-    localStorage.setItem('accessToken', userData.accessToken);
-    localStorage.setItem('refreshToken', userData.refreshToken);
-  }
+  
   return userData;
 };
 
-export const logoutUser = async () => {
-  await request('/logout', 'POST');
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+// export const logoutUser = async (setAuthStatus) => {
+//   await request('/logout', 'POST');
+//   if (setAuthStatus) {
+//     setAuthStatus(false); // Update authentication state in React
+//   }
+  
+
+
+ 
+// };
+export const logoutUser = async (setAuthStatus) => {
+  try {
+    const response = await request('/logout', 'POST');
+
+    if (response && response.ok) {
+      console.log("Logout successful");
+      
+     
+
+      if (setAuthStatus) {
+        setAuthStatus(false); // Update authentication state in React
+      }
+    } else {
+      console.error("Logout failed:", response.status);
+    }
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
 };
+
 
 export const getProfile = async () => request('/get_profile', 'GET');
 export const PostProfile = async (userData) =>
   request('/post_profile', 'POST', userData);
+
+
+  export const verifyToken = async () => request('/verify-token', 'GET');

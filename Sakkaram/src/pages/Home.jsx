@@ -4,12 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import { FaTractor, FaCalendarCheck, FaWallet, FaChartLine } from "react-icons/fa";
 
 const Home = () => {
-  const { user, role } = useAuth();
+  const { user } = useAuth();
   const [greeting, setGreeting] = useState("");
   const [stats, setStats] = useState({
-    bookings: role === "farmer" ? 3 : 8,
-    earnings: role === "farmer" ? 0 : 12500,
-    vehicles: role === "farmer" ? 0 : 3,
+    bookings: user.role === "farmer" ? 3 : 8,
+    earnings: user.role === "farmer" ? 0 : 12500,
+    vehicles: user.role === "farmer" ? 0 : 3,
     notifications: 2
   });
 
@@ -323,7 +323,7 @@ const Home = () => {
               <FaWallet className="text-purple-600 text-xl" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{role === "farmer" ? "Wallet Balance" : "Earnings"}</p>
+              <p className="text-sm text-gray-500">{user.role === "farmer" ? "Wallet Balance" : "Earnings"}</p>
               <p className="text-xl font-bold">₹{stats.earnings.toLocaleString()}</p>
             </div>
           </div>
@@ -341,8 +341,8 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Render dashboard based on user role */}
-        {role === "farmer" ? <FarmerDashboard /> : <OwnerDashboard />}
+        {/* Render dashboard based on user user.role */}
+        {user.role === "farmer" ? <FarmerDashboard /> : <OwnerDashboard />}
       </div>
     </div>
   );
