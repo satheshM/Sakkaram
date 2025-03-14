@@ -138,7 +138,7 @@ export const AuthProvider = ({ children }) => {
         if (userData) {
           
           setUser(userData);
-          console.log("after login"+JSON.stringify(userData))
+          
           setIsAuthenticated(true)
         }
       };

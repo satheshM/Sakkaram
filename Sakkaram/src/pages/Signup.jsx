@@ -43,7 +43,7 @@ const Signup = () => {
     try {
       // Register the user
       const response = await registerUser(email, password, role);
-      const userData = await response
+      const userData = await response.json();
 
       console.log("After signup"+JSON.stringify(response))
       
