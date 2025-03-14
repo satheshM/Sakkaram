@@ -8,6 +8,8 @@ import Home from './pages/Home';
 import Booking from './pages/Booking';
 import VehicleList from './pages/VehicleList';
 import Profile from './pages/Profile';
+import Wallet from './pages/Wallet';
+
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import MyVehicles from './pages/MyVehicles';
@@ -56,6 +58,10 @@ const AppContent = () => {
           <Route
             path="/earnings"
             element={<ProtectedRoute element={<Earnings />} />}
+          />
+          <Route
+            path="/wallet"
+            element={<ProtectedRoute element={<Wallet />} />}
           />
           <Route
             path="/owner-bookings"
