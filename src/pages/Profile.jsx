@@ -238,9 +238,16 @@ const Profile = () => {
       <div className="absolute inset-0 opacity-20">
         <div className="grid grid-cols-6 gap-4 p-4">
           {Array(18).fill(null).map((_, i) => (
-            <FaTractor key={i} className="text-white text-3xl transform rotate-45" />
-          ))}
+
+profileData.role === "farmer" ? (
+  <FaSeedling key={i} className="text-white text-3xl transform rotate-45" />
+) :(<FaTractor key={i} className="text-white text-3xl transform rotate-45" />)
+  ))}
         </div>
+
+
+
+       
       </div>
       
       <div className="absolute  left-6 border-4 border-white rounded-full overflow-hidden h-32 w-32 bg-white shadow-lg">
