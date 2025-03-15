@@ -12,7 +12,8 @@
     "bankName": "HDFC",
     "accountNumber": "67269200000058",
     "ifscCode": "HDFCIBO09870054",
-    "upiId": "ramIB@HDFC"
+    "upiId": "ramIB@HDFC",
+    "idType": "Driving License"
   },
   {
     "id": "46ef1754-6c7a-483b-b6a4-e713eadceebc",
@@ -20,7 +21,7 @@
     "password": "$2b$10$v9uYP6aYj2/PKSSR1Kaw6OGTuVke7McZ/zMdX8FsM6tXIazg905si",
     "role": "farmer",
     "createdAt": 2025,
-    "name": "Narayanan",
+    "name": "Narayanan M",
     "phone": "99876524356",
     "address": "Dharmapuri",
     "idNumber": "686754765765",

@@ -115,6 +115,7 @@ export const AuthProvider = ({ children }) => {
 
       if (res.ok) {
         const data = await res.json();
+      //  console.log("refresh data", JSON.stringify(data.user));
         setUser(data.user);
         setIsAuthenticated(true);
         console.log("✅ Authentication verified.");
