@@ -14,7 +14,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import MyVehicles from './pages/MyVehicles';
 import Earnings from './pages/Earnings';
-import AllBookings from './pages/AllBookings';
+import VehicleOwnerBookings from './pages/VehicleOwnerBookings';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
@@ -65,7 +65,7 @@ const AppContent = () => {
           />
           <Route
             path="/owner-bookings"
-            element={<ProtectedRoute element={<AllBookings />} />}
+            element={<ProtectedRoute element={<VehicleOwnerBookings />} />}
           />
         </Routes>
       </div>

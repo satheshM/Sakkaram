@@ -11,7 +11,7 @@ import {
   FaEye,
 } from 'react-icons/fa';
 import { GetOwnerBookings, UpdateBookingStatus } from '../api/Bookings';
-const AllBookings = () => {
+const VehicleOwnerBookings = () => {
   // Sample Data for Bookings
   // const [requests, setRequests] = useState([
   //   {
@@ -286,7 +286,7 @@ const confirmBooking = async (id) => {
     const payload = {
       id: id,
       status: 'Cancelled',
-      cancellationReason: cancellationReason,
+      cancellationReason:"VehicleOwner: "+ cancellationReason,
     };
     const response = await UpdateBookingStatus(payload);
 
@@ -838,4 +838,4 @@ const confirmBooking = async (id) => {
   );
 };
 
-export default AllBookings;
+export default VehicleOwnerBookings;
