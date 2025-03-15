@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
-import { GetUserBookings,submitReview as postReview } from '../api/Bookings';
+import { GetUserBookings,submitReview as postReview,UpdateBookingStatus  } from '../api/Bookings';
 
 const Booking = () => {
   const { user } = useAuth();
@@ -133,40 +133,111 @@ const Booking = () => {
   }, []);
 
   // Handle booking cancellation
-  const cancelBooking = () => {
+  // const cancelBooking = () => {
+  //   if (!cancellationReason.trim()) {
+  //     alert('Please provide a reason for cancellation');
+  //     return;
+  //   }
+
+  //   // Find the booking to cancel
+  //   const bookingToCancel = bookings.upcoming.find(
+  //     (b) => b.id === selectedBooking.id
+  //   );
+
+  //   if (bookingToCancel) {
+  //     // Remove from upcoming
+  //     const updatedUpcoming = bookings.upcoming.filter(
+  //       (b) => b.id !== selectedBooking.id
+  //     );
+
+  //     // Add to past with cancelled status
+  //     const cancelledBooking = {
+  //       ...bookingToCancel,
+  //       status: 'Cancelled',
+  //       cancellationReason,
+  //     };
+
+  //     setBookings({
+  //       upcoming: updatedUpcoming,
+  //       past: [cancelledBooking, ...bookings.past],
+  //     });
+
+  //     setShowCancelModal(false);
+  //     setSelectedBooking(null);
+  //     setCancellationReason('');
+  //   }
+  // };
+
+
+
+  const cancelBooking = async () => {
     if (!cancellationReason.trim()) {
       alert('Please provide a reason for cancellation');
       return;
     }
-
-    // Find the booking to cancel
-    const bookingToCancel = bookings.upcoming.find(
-      (b) => b.id === selectedBooking.id
-    );
-
-    if (bookingToCancel) {
-      // Remove from upcoming
-      const updatedUpcoming = bookings.upcoming.filter(
-        (b) => b.id !== selectedBooking.id
+  
+    const payload = {
+      id: selectedBooking.id,
+      status: 'Cancelled',
+      cancellationReason: "FARMER: "+cancellationReason,
+    };
+  
+    try {
+      const response = await UpdateBookingStatus(payload);
+  
+      if (response.status !== 200) {
+        alert('Failed to cancel booking. Please try again.');
+        return;
+      }
+  
+      // Find the booking to cancel
+      const bookingToCancel = bookings.upcoming.find(
+        (b) => b.id === selectedBooking.id
       );
-
-      // Add to past with cancelled status
-      const cancelledBooking = {
-        ...bookingToCancel,
-        status: 'Cancelled',
-        cancellationReason,
-      };
-
-      setBookings({
-        upcoming: updatedUpcoming,
-        past: [cancelledBooking, ...bookings.past],
-      });
-
-      setShowCancelModal(false);
-      setSelectedBooking(null);
-      setCancellationReason('');
+  
+      if (bookingToCancel) {
+        // Remove from upcoming bookings
+        const updatedUpcoming = bookings.upcoming.filter(
+          (b) => b.id !== selectedBooking.id
+        );
+  
+        // Move to past bookings with cancelled status
+        const cancelledBooking = {
+          ...bookingToCancel,
+          status: 'Cancelled',
+          cancellationReason,
+        };
+  
+        setBookings((prevBookings) => ({
+          upcoming: updatedUpcoming,
+          past: [cancelledBooking, ...(prevBookings.past || [])], // Ensure past array exists
+        }));
+  
+        // Reset modal and selected booking state
+        setShowCancelModal(false);
+        setSelectedBooking(null);
+        setCancellationReason('');
+      }
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      alert('An error occurred while cancelling. Please try again later.');
     }
   };
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
   // Handle submitting a review
  

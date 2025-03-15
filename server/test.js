@@ -655,7 +655,7 @@ app.get('/api/verify-token', (req, res) => {
           return res.status(404).json({ message: 'Booking not found' });
         }
 
-        if (bookings[bookingIndex].ownerId !== req.user.id) {
+        if ((bookings[bookingIndex].ownerId !== req.user.id)&&(bookings[bookingIndex].farmerId !== req.user.id)) {
           logger.warn(`Unauthorized attempt to update booking ${id} by ${req.user.email}`);
           return res.status(403).json({ message: 'Unauthorized' });
         }
