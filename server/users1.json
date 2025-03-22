@@ -33,5 +33,12 @@
     "password": "$2b$10$Z6WIiBFEVgmBn0VGdHxJV.NCRouCzXS2CHPqYfgsZ8EaobrBKzxW2",
     "role": "vehicle_owner",
     "createdAt": 2025
+  },
+  {
+    "id": "1ee8c28a-a43e-42ec-bbcf-8e936d470dca",
+    "email": "testing001@gmail.com",
+    "password": "$2b$10$D.cumWBYJcMlfFpKdpRREuURzF1ZS0ihT05k6nSldcP.Eh3om1hGi",
+    "role": "farmer",
+    "createdAt": 2025
   }
 ]
