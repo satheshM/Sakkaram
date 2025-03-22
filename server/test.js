@@ -724,5 +724,57 @@ app.get('/api/verify-token', (req, res) => {
       res.json({ message: 'Booking cancelled successfully' });
     });
 
+
+
+    //Razorpay Implementation
+
+    const Razorpay = require('razorpay');
+
+// ✅ Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: 'rzp_test_b1A45GxApr12tC', // Replace with your test key
+  key_secret: 'eX23SrTBzN95la1NNnJ5y5nt', // Replace with your secret key
+});
+
+
+    app.post("/api/create-order", async (req, res) => {
+      try {
+        const { amount, currency } = req.body;
+    
+        const options = {
+          amount: amount * 100, // Convert to paise
+          currency: currency || "INR",
+          receipt: `receipt_${Date.now()}`,
+        };
+    
+        const order = await razorpay.orders.create(options);
+        res.json(order);
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+
+
+
+    const crypto = require("crypto");
+
+app.post("/api/verify-payment", async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+  const generated_signature = crypto
+    .createHmac("sha256", "eX23SrTBzN95la1NNnJ5y5nt")
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
+
+  if (generated_signature === razorpay_signature) {
+    res.json({ success: true, message: "Payment verified successfully" });
+  } else {
+    res.status(400).json({ success: false, message: "Payment verification failed" });
+  }
+});
+
+    
+
     // ✅ Start Server
     app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
