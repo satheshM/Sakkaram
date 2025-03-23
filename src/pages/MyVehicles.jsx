@@ -658,7 +658,7 @@ const MyVehicles = () => {
                     </p>
                   </div>
 
-                  {vehicle.features.length > 0 && (
+                  {vehicle.features && (
                     <div className="mb-3">
                       <div className="flex flex-wrap gap-1">
                         {vehicle.features.map((feature, idx) => (
