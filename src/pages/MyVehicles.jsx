@@ -19,21 +19,7 @@ import {
 
 const MyVehicles = () => {
   // Sample Data
-  const [vehicles, setVehicles] = useState([
-    {
-      id: null,
-      type: null,
-      model: null,
-      number: null,
-      price: null,
-      priceUnit: null,
-      location: null,
-      features: [],
-      description: null,
-      available: true,
-      image: null,
-    },
-  ]);
+  const [vehicles, setVehicles] = useState([]);
 
   //get Vehicle list before page load
   useEffect(() => {
@@ -658,7 +644,7 @@ const MyVehicles = () => {
                     </p>
                   </div>
 
-                  {vehicle.features.length > 0 && (
+                  {vehicle.features && (
                     <div className="mb-3">
                       <div className="flex flex-wrap gap-1">
                         {vehicle.features.map((feature, idx) => (
