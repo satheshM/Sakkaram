@@ -22,14 +22,12 @@
     "owner": "Ram Kumar",
     "ownerId": "56cbdad6-cc3e-4d3e-ac00-24ee111f0376",
     "type": "Harvester",
-    "model": "John Deere DC-68G",
+    "model": "John Deere DC-68Gh",
     "number": "TN-30-298-394",
     "price": 1501,
     "priceUnit": "hour",
     "location": "Dharmapuri",
-    "features": [
-      "50 HP"
-    ],
+    "features": [],
     "description": "Good Condition",
     "available": true,
     "image": "https://5.imimg.com/data5/SELLER/Default/2023/3/294199762/CM/LZ/JS/186750549/bicycle-cranks-500x500.png",
