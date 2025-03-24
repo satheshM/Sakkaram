@@ -1061,6 +1061,7 @@ app.get('/api/verify-token', (req, res) => {
             logger.error(`Error inserting booking: ${error.message}`);
             return res.status(500).json({ message: 'Failed to create booking' });
           }
+          
       
           // ✅ 4️⃣ Return success response
           logger.info(`Booking created for vehicle ${vehicleId} by ${req.user.email}`);
