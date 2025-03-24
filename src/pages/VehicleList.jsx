@@ -305,6 +305,7 @@ const VehicleList = () => {
       // Step 1: Request Backend to Create Order
       const orderResponse = await fetch("http://localhost:5000/api/create-order", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
       });
@@ -323,6 +324,7 @@ const VehicleList = () => {
           // Step 3: Verify Payment
           const verifyResponse = await fetch("http://localhost:5000/api/verify-payment", {
             method: "POST",
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(paymentResponse),
           });

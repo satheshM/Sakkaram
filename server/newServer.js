@@ -97,6 +97,7 @@ const express = require('express');
     // ✅ Authentication Middleware
     const authenticateToken = (req, res, next) => {
       const token = req.cookies.token;
+     
       if (!token) {
         logger.warn('Unauthorized access attempt: No token');
         return res.status(401).json({ message: 'Unauthorized: No token provided' });
@@ -412,7 +413,7 @@ app.get('/api/verify-token', (req, res) => {
           );
       
           const refreshToken = jwt.sign(
-            { id: user.id },
+            { id: user.id,email: user.email, role: user.role, },
             REFRESH_SECRET_KEY,
             { expiresIn: '7d' }
           );
@@ -1492,45 +1493,123 @@ const razorpay = new Razorpay({
 });
 
 
-    app.post("/api/create-order", async (req, res) => {
-      try {
-        const { amount, currency } = req.body;
+    // app.post("/api/create-order", async (req, res) => {
+    //   try {
+    //     const { amount, currency } = req.body;
     
+    //     const options = {
+    //       amount: amount * 100, // Convert to paise
+    //       currency: currency || "INR",
+    //       receipt: `receipt_${Date.now()}`,
+    //     };
+    
+    //     const order = await razorpay.orders.create(options);
+    //     res.json(order);
+    //   } catch (error) {
+    //     res.status(500).json({ error: error.message });
+    //   }
+    // });
+
+    app.post('/api/create-order', authenticateToken, async (req, res) => {
+      try {
+        const { bookingId, amount, currency = 'INR' } = req.body;
+        const userId = req.user.id; // Authenticated user
+    
+        // ✅ 1️⃣ Create order with Razorpay
         const options = {
           amount: amount * 100, // Convert to paise
-          currency: currency || "INR",
+          currency,
           receipt: `receipt_${Date.now()}`,
         };
     
         const order = await razorpay.orders.create(options);
+    
+        // ✅ 2️⃣ Store order details in Supabase
+        const { error } = await supabase.from('payments').insert([
+          {
+            order_id: order.id,
+            amount,
+            currency,
+            status: 'Pending',
+            booking_id: bookingId,
+            user_id: userId,
+          }
+        ]);
+    
+        if (error) {
+          logger.error(`Error storing payment: ${error.message}`);
+          return res.status(500).json({ message: 'Failed to create order' });
+        }
+    
+        // ✅ 3️⃣ Return Razorpay order details
         res.json(order);
       } catch (error) {
         res.status(500).json({ error: error.message });
       }
     });
+    
 
 
 
+//     const crypto = require("crypto");
 
-    const crypto = require("crypto");
+// app.post("/api/verify-payment", async (req, res) => {
+//   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-app.post("/api/verify-payment", async (req, res) => {
-  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+//   const generated_signature = crypto
+//     .createHmac("sha256", "eX23SrTBzN95la1NNnJ5y5nt")
+//     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+//     .digest("hex");
 
-  const generated_signature = crypto
-    .createHmac("sha256", "eX23SrTBzN95la1NNnJ5y5nt")
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest("hex");
-
-  if (generated_signature === razorpay_signature) {
-    res.json({ success: true, message: "Payment verified successfully" });
-  } else {
-    res.status(400).json({ success: false, message: "Payment verification failed" });
-  }
-});
+//   if (generated_signature === razorpay_signature) {
+//     res.json({ success: true, message: "Payment verified successfully" });
+//   } else {
+//     res.status(400).json({ success: false, message: "Payment verification failed" });
+//   }
+// });
 
     
 
     // ✅ Start Server
+
+    const crypto = require("crypto");
+
+app.post('/api/verify-payment', authenticateToken, async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+  const userId = req.user.id; // Get authenticated user ID
+
+  // ✅ 1️⃣ Verify payment signature
+  const generated_signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_SECRET) // Store secret in .env
+    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+    .digest("hex");
+
+  if (generated_signature !== razorpay_signature) {
+    logger.warn(`Payment verification failed for order: ${razorpay_order_id}`);
+    return res.status(400).json({ success: false, message: 'Payment verification failed' });
+  }
+
+  // ✅ 2️⃣ Update payment details in Supabase
+  const { error } = await supabase.from('payments')
+    .update({
+      payment_id: razorpay_payment_id,
+      signature: razorpay_signature,
+      status: 'Success'
+    })
+    .eq('order_id', razorpay_order_id)
+    .eq('user_id', userId);
+
+  if (error) {
+    logger.error(`Error updating payment: ${error.message}`);
+    return res.status(500).json({ message: 'Failed to verify payment' });
+  }
+
+  // ✅ 3️⃣ Return success response
+  logger.info(`Payment verified successfully for order: ${razorpay_order_id}`);
+  res.json({ success: true, message: 'Payment verified successfully' });
+});
+
+
+
     app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
     //devtest 
