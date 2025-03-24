@@ -1104,6 +1104,42 @@ app.get('/api/verify-token', (req, res) => {
     //   res.json(userBookings);
     // });
 
+    // app.get('/api/user/bookings', authenticateToken, async (req, res) => {
+    //     const userId = req.user.id; // Get user ID from token
+      
+    //     // ✅ 1️⃣ Fetch user's bookings from Supabase
+    //     const { data: bookings, error } = await supabase
+    //       .from('bookings')
+    //       .select('*')
+    //       .eq('farmer_id', userId);
+      
+    //     // ✅ 2️⃣ Handle errors
+    //     if (error) {
+    //       logger.warn(`Failed to fetch bookings for user ${req.user.email}: ${error.message}`);
+    //       return res.status(500).json({ message: 'Failed to fetch bookings', error: error.message });
+    //     }
+      
+    //     if (!bookings || bookings.length === 0) {
+    //       logger.warn(`No bookings found for user ${req.user.email}`);
+    //       return res.json({ upcoming: [], past: [] });
+    //     }
+      
+    //     // ✅ 3️⃣ Filter bookings into upcoming and past
+    //     const userBookings = {
+    //       upcoming: bookings.filter((b) =>
+    //         ['Pending', 'Ongoing', 'Confirmed'].includes(b.status)
+    //       ),
+    //       past: bookings.filter((b) =>
+    //         ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)
+    //       ),
+    //     };
+      
+    //     // ✅ 4️⃣ Return filtered bookings
+    //     logger.info(`Bookings fetched for user ${req.user.email}`);
+    //     res.json(userBookings);
+    //   });
+
+
     app.get('/api/user/bookings', authenticateToken, async (req, res) => {
         const userId = req.user.id; // Get user ID from token
       
@@ -1124,116 +1160,302 @@ app.get('/api/verify-token', (req, res) => {
           return res.json({ upcoming: [], past: [] });
         }
       
-        // ✅ 3️⃣ Filter bookings into upcoming and past
+        // ✅ 3️⃣ Map database fields to frontend field names
+        const mappedBookings = bookings.map((b) => ({
+          id: b.id,
+          farmerId: b.farmer_id,
+          ownerId: b.owner_id,
+          owner: b.owner,
+          vehicleId: b.vehicle_id,
+          vehicleModel: b.vehicle_model,
+          vehicleType: b.vehicle_type,
+          image: b.image,
+          location: b.location,
+          farmerMsg: b.farmer_msg,
+          distance: b.distance,
+          pricePerHour: b.price_per_hour,
+          bookingDate: b.booking_date,
+          duration: b.duration,
+          totalPrice: b.total_price,
+          status: b.status,
+          createdAt: b.created_at,
+        }));
+      
+        // ✅ 4️⃣ Separate upcoming and past bookings
         const userBookings = {
-          upcoming: bookings.filter((b) =>
+          upcoming: mappedBookings.filter((b) =>
             ['Pending', 'Ongoing', 'Confirmed'].includes(b.status)
           ),
-          past: bookings.filter((b) =>
+          past: mappedBookings.filter((b) =>
             ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)
           ),
         };
       
-        // ✅ 4️⃣ Return filtered bookings
-        logger.info(`Bookings fetched for user ${req.user.email}`);
+        // ✅ 5️⃣ Return mapped bookings
+        logger.info(`Bookings fetched and mapped for user ${req.user.email}`);
         res.json(userBookings);
       });
       
+      
 
     // 🔹 Get Owner's Bookings
-    app.get('/api/owner/bookings', authenticateToken, (req, res) => {
-      const Allbookings = readBookings();
+    // app.get('/api/owner/bookings', authenticateToken, (req, res) => {
+    //   const Allbookings = readBookings();
 
-      if (!Array.isArray(Allbookings) || Allbookings.length === 0) {
-        logger.warn(`No bookings found for owner ${req.user.email}`);
-        return res.json([]);
-      }
+    //   if (!Array.isArray(Allbookings) || Allbookings.length === 0) {
+    //     logger.warn(`No bookings found for owner ${req.user.email}`);
+    //     return res.json([]);
+    //   }
 
-      const ownersBooking = {
-        bookingRequest: Allbookings.filter(
-          (b) => b.ownerId === req.user.id && b.status === 'Pending'
-        ),
-        activeBookings: Allbookings.filter(
-          (b) => b.ownerId === req.user.id && (b.status === 'Ongoing' || b.status === 'Confirmed')
-        ),
-        bookingHistory: Allbookings.filter(
-          (b) =>
-            b.ownerId === req.user.id &&
-            (b.status === 'Completed' ||
-              b.status === 'Cancelled' ||
-              b.status === 'Rejected' ||
-              b.status === 'Reviewed')
-        ),
-      };
+    //   const ownersBooking = {
+    //     bookingRequest: Allbookings.filter(
+    //       (b) => b.ownerId === req.user.id && b.status === 'Pending'
+    //     ),
+    //     activeBookings: Allbookings.filter(
+    //       (b) => b.ownerId === req.user.id && (b.status === 'Ongoing' || b.status === 'Confirmed')
+    //     ),
+    //     bookingHistory: Allbookings.filter(
+    //       (b) =>
+    //         b.ownerId === req.user.id &&
+    //         (b.status === 'Completed' ||
+    //           b.status === 'Cancelled' ||
+    //           b.status === 'Rejected' ||
+    //           b.status === 'Reviewed')
+    //     ),
+    //   };
 
-      logger.info(`Owner bookings fetched for user ${req.user.email}`);
-      res.json(ownersBooking);
-    });
+    //   logger.info(`Owner bookings fetched for user ${req.user.email}`);
+    //   res.json(ownersBooking);
+    // });
+
+    app.get('/api/owner/bookings', authenticateToken, async (req, res) => {
+        const ownerId = req.user.id; // Get owner ID from token
+      
+        // ✅ 1️⃣ Fetch bookings where the user is the owner
+        const { data: bookings, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('owner_id', ownerId);
+      
+        // ✅ 2️⃣ Handle errors
+        if (error) {
+          logger.warn(`Failed to fetch bookings for owner ${req.user.email}: ${error.message}`);
+          return res.status(500).json({ message: 'Failed to fetch bookings', error: error.message });
+        }
+      
+        if (!bookings || bookings.length === 0) {
+          logger.warn(`No bookings found for owner ${req.user.email}`);
+          return res.json({ bookingRequest: [], activeBookings: [], bookingHistory: [] });
+        }
+      
+        // ✅ 3️⃣ Map database fields to frontend field names
+        const mappedBookings = bookings.map((b) => ({
+          id: b.id,
+          farmerId: b.farmer_id,
+          ownerId: b.owner_id,
+          owner: b.owner,
+          vehicleId: b.vehicle_id,
+          vehicleModel: b.vehicle_model,
+          vehicleType: b.vehicle_type,
+          image: b.image,
+          feedback:b.feedback,
+          rating:b.rating,
+          location: b.location,
+          farmerMsg: b.farmer_msg,
+          distance: b.distance,
+          pricePerHour: b.price_per_hour,
+          bookingDate: b.booking_date,
+          duration: b.duration,
+          totalPrice: b.total_price,
+          status: b.status,
+          createdAt: b.created_at,
+          cancellationReason: b.cancellation_reason,
+        }));
+      
+        // ✅ 4️⃣ Categorize bookings
+        const ownersBooking = {
+          bookingRequest: mappedBookings.filter((b) => b.status === 'Pending'),
+          activeBookings: mappedBookings.filter((b) =>
+            ['Ongoing', 'Confirmed'].includes(b.status)
+          ),
+          bookingHistory: mappedBookings.filter((b) =>
+            ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)
+          ),
+        };
+      
+        // ✅ 5️⃣ Return categorized bookings
+        logger.info(`Owner bookings fetched and mapped for user ${req.user.email}`);
+        res.json(ownersBooking);
+      });
+      
 
     // 🔹 Update Booking Status (Owner Only)
+    // app.patch(
+    //   '/api/owner/bookings/status',
+    //   authenticateToken,
+    //   validateInput([
+    //     check('id').notEmpty().withMessage('Booking ID is required'),
+    //     check('status').notEmpty().withMessage('Status is required'),
+    //   ]),
+    //   (req, res) => {
+    //     const { cancellationReason, status, id } = req.body;
+    //     let bookings = readBookings();
+    //     const bookingIndex = bookings.findIndex((b) => b.id === id);
+
+    //     if (bookingIndex === -1) {
+    //       logger.warn(`Booking status update failed: Booking ${id} not found`);
+    //       return res.status(404).json({ message: 'Booking not found' });
+    //     }
+
+    //     if ((bookings[bookingIndex].ownerId !== req.user.id)&&(bookings[bookingIndex].farmerId !== req.user.id)) {
+    //       logger.warn(`Unauthorized attempt to update booking ${id} by ${req.user.email}`);
+    //       return res.status(403).json({ message: 'Unauthorized' });
+    //     }
+
+    //     bookings[bookingIndex].status = status;
+    //     bookings[bookingIndex].cancellationReason = cancellationReason;
+    //     writeBookings(bookings);
+    //     logger.info(`Booking status updated: ${id} to ${status} by ${req.user.email}`);
+    //     res.json({ message: 'Booking status updated' });
+    //   }
+    // );
+
     app.patch(
-      '/api/owner/bookings/status',
-      authenticateToken,
-      validateInput([
-        check('id').notEmpty().withMessage('Booking ID is required'),
-        check('status').notEmpty().withMessage('Status is required'),
-      ]),
-      (req, res) => {
-        const { cancellationReason, status, id } = req.body;
-        let bookings = readBookings();
-        const bookingIndex = bookings.findIndex((b) => b.id === id);
-
-        if (bookingIndex === -1) {
-          logger.warn(`Booking status update failed: Booking ${id} not found`);
-          return res.status(404).json({ message: 'Booking not found' });
+        '/api/owner/bookings/status',
+        authenticateToken,
+        validateInput([
+          check('id').notEmpty().withMessage('Booking ID is required'),
+          check('status').notEmpty().withMessage('Status is required'),
+        ]),
+        async (req, res) => {
+          const { id, status, cancellationReason = '' } = req.body;
+          const userId = req.user.id; // Get authenticated user ID
+      
+          // ✅ 1️⃣ Fetch the booking from Supabase
+          const { data: booking, error: fetchError } = await supabase
+            .from('bookings')
+            .select('id, owner_id, farmer_id')
+            .eq('id', id)
+            .single();
+      
+          if (fetchError || !booking) {
+            logger.warn(`Booking status update failed: Booking ${id} not found`);
+            return res.status(404).json({ message: 'Booking not found' });
+          }
+      
+          // ✅ 2️⃣ Ensure only the owner or the farmer can update the booking status
+          if (booking.owner_id !== userId && booking.farmer_id !== userId) {
+            logger.warn(`Unauthorized attempt to update booking ${id} by ${req.user.email}`);
+            return res.status(403).json({ message: 'Unauthorized' });
+          }
+      
+          // ✅ 3️⃣ Update the booking status in Supabase
+          const { error: updateError } = await supabase
+            .from('bookings')
+            .update({
+              status,
+              cancellation_reason: cancellationReason,
+            })
+            .eq('id', id);
+      
+          if (updateError) {
+            logger.error(`Error updating booking status ${id}: ${updateError.message}`);
+            return res.status(500).json({ message: 'Failed to update booking status' });
+          }
+      
+          // ✅ 4️⃣ Return success response
+          logger.info(`Booking status updated: ${id} to ${status} by ${req.user.email}`);
+          res.json({ message: 'Booking status updated' });
         }
-
-        if ((bookings[bookingIndex].ownerId !== req.user.id)&&(bookings[bookingIndex].farmerId !== req.user.id)) {
-          logger.warn(`Unauthorized attempt to update booking ${id} by ${req.user.email}`);
-          return res.status(403).json({ message: 'Unauthorized' });
-        }
-
-        bookings[bookingIndex].status = status;
-        bookings[bookingIndex].cancellationReason = cancellationReason;
-        writeBookings(bookings);
-        logger.info(`Booking status updated: ${id} to ${status} by ${req.user.email}`);
-        res.json({ message: 'Booking status updated' });
-      }
-    );
+      );
+      
 
     // 🔹 Submit Review (Farmer)
+    // app.patch(
+    //   '/api/bookings/submitReview',
+    //   authenticateToken,
+    //   validateInput([
+    //     check('bookingId').notEmpty().withMessage('Booking ID is required'),
+    //     check('rating').isNumeric().withMessage('Rating must be a number'),
+    //     check('feedback').notEmpty().withMessage('Feedback is required'),
+    //     check('status').notEmpty().withMessage('Status is required'),
+    //   ]),
+    //   (req, res) => {
+    //     const { bookingId, rating, feedback, status } = req.body;
+    //     let bookings = readBookings();
+    //     const bookingIndex = bookings.findIndex((b) => b.id === bookingId);
+
+    //     if (bookingIndex === -1) {
+    //       logger.warn(`Review submission failed: Booking ${bookingId} not found`);
+    //       return res.status(404).json({ message: 'Booking not found' });
+    //     }
+
+    //     if (bookings[bookingIndex].farmerId !== req.user.id) {
+    //       logger.warn(`Unauthorized attempt to submit review for booking ${bookingId} by ${req.user.email}`);
+    //       return res.status(403).json({ message: 'Unauthorized' });
+    //     }
+
+    //     bookings[bookingIndex].feedback = feedback;
+    //     bookings[bookingIndex].rating = rating;
+    //     bookings[bookingIndex].status = status;
+    //     writeBookings(bookings);
+    //     logger.info(`Review submitted for booking ${bookingId} by ${req.user.email}`);
+    //     res.json({ message: 'Successfully Reviewed' });
+    //   }
+    // );
+
     app.patch(
-      '/api/bookings/submitReview',
-      authenticateToken,
-      validateInput([
-        check('bookingId').notEmpty().withMessage('Booking ID is required'),
-        check('rating').isNumeric().withMessage('Rating must be a number'),
-        check('feedback').notEmpty().withMessage('Feedback is required'),
-        check('status').notEmpty().withMessage('Status is required'),
-      ]),
-      (req, res) => {
-        const { bookingId, rating, feedback, status } = req.body;
-        let bookings = readBookings();
-        const bookingIndex = bookings.findIndex((b) => b.id === bookingId);
-
-        if (bookingIndex === -1) {
-          logger.warn(`Review submission failed: Booking ${bookingId} not found`);
-          return res.status(404).json({ message: 'Booking not found' });
+        '/api/bookings/submitReview',
+        authenticateToken,
+        validateInput([
+          check('bookingId').notEmpty().withMessage('Booking ID is required'),
+          check('rating').isNumeric().withMessage('Rating must be a number'),
+          check('feedback').notEmpty().withMessage('Feedback is required'),
+          check('status').notEmpty().withMessage('Status is required'),
+        ]),
+        async (req, res) => {
+          const { bookingId, rating, feedback, status } = req.body;
+          const userId = req.user.id; // Get authenticated user ID
+      
+          // ✅ 1️⃣ Fetch the booking from Supabase
+          const { data: booking, error: fetchError } = await supabase
+            .from('bookings')
+            .select('id, farmer_id')
+            .eq('id', bookingId)
+            .single();
+      
+          if (fetchError || !booking) {
+            logger.warn(`Review submission failed: Booking ${bookingId} not found`);
+            return res.status(404).json({ message: 'Booking not found' });
+          }
+      
+          // ✅ 2️⃣ Ensure only the farmer can submit the review
+          if (booking.farmer_id !== userId) {
+            logger.warn(`Unauthorized attempt to submit review for booking ${bookingId} by ${req.user.email}`);
+            return res.status(403).json({ message: 'Unauthorized' });
+          }
+      
+          // ✅ 3️⃣ Update the booking with the review
+          const { error: updateError } = await supabase
+            .from('bookings')
+            .update({
+              feedback,
+              rating,
+              status,
+            })
+            .eq('id', bookingId);
+      
+          if (updateError) {
+            logger.error(`Error submitting review for booking ${bookingId}: ${updateError.message}`);
+            return res.status(500).json({ message: 'Failed to submit review' });
+          }
+      
+          // ✅ 4️⃣ Return success response
+          logger.info(`Review submitted for booking ${bookingId} by ${req.user.email}`);
+          res.json({ message: 'Successfully Reviewed' });
         }
-
-        if (bookings[bookingIndex].farmerId !== req.user.id) {
-          logger.warn(`Unauthorized attempt to submit review for booking ${bookingId} by ${req.user.email}`);
-          return res.status(403).json({ message: 'Unauthorized' });
-        }
-
-        bookings[bookingIndex].feedback = feedback;
-        bookings[bookingIndex].rating = rating;
-        bookings[bookingIndex].status = status;
-        writeBookings(bookings);
-        logger.info(`Review submitted for booking ${bookingId} by ${req.user.email}`);
-        res.json({ message: 'Successfully Reviewed' });
-      }
-    );
+      );
+      
 
     // 🔹 Cancel Booking (Farmer)
     app.delete('/api/bookings/:id', authenticateToken, (req, res) => {
