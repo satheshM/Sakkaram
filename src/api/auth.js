@@ -135,7 +135,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000
 // 🔄 Refresh Access Token
 const refreshToken = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/refresh-token`, {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
       method: "GET",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -195,13 +195,13 @@ export const request = async (endpoint, method, body, retry = true) => {
 };
 
 // 🔹 Authentication Functions
-export const loginUser = async (email, password) => request('/login', 'POST', { email, password });
-export const registerUser = async (email, password, role) => request('/signup', 'POST', { email, password, role });
+export const loginUser = async (email, password) => request('/auth/login', 'POST', { email, password });
+export const registerUser = async (email, password, role) => request('/auth/signup', 'POST', { email, password, role });
 
 // 🔹 Logout User
 export const logoutUser = async () => {
   try {
-    const response = await request('/logout', 'POST');
+    const response = await request('/auth/logout', 'POST');
 
     if (response && response.ok) {
       console.log("✅ Logout successful.");
@@ -214,6 +214,6 @@ export const logoutUser = async () => {
 };
 
 // 🔹 Fetch User Profile
-export const getProfile = async () => request('/get_profile', 'GET');
-export const PostProfile = async (userData) => request('/post_profile', 'POST', userData);
-export const verifyToken = async () => request('/verify-token', 'GET');
+export const getProfile = async () => request('/profile/getProfile', 'GET');
+export const PostProfile = async (userData) => request('/profile/updateProfile', 'PUT', userData);
+export const verifyToken = async () => request('/auth//verify-token', 'GET');

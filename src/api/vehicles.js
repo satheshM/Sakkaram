@@ -2,7 +2,7 @@ import { request } from './auth'; // Reuse the request function
 
 export const fetchVehicles = async () => request('/vehicles', 'GET');
 
-export const fetchUserVehicles = async () => request('/user/vehicles', 'GET');
+export const fetchUserVehicles = async () => request('/vehicles/owner', 'GET');
 
 export const addVehicle = async (vehicleData) =>
   request('/vehicles', 'POST', vehicleData);

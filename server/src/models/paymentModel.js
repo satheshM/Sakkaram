@@ -1,11 +1,16 @@
 const supabase = require('../config/db');
 
-const createPaymentRecord = async (paymentData) => {
-  return await supabase.from('payments').insert([paymentData]).select().single();
+const createPaymentRecord = async (payment) => {
+  const { error } = await supabase.from('payments').insert([payment]);
+  if (error) throw new Error(error.message);
 };
 
-const verifyPayment = async (orderId, paymentDetails) => {
-  return await supabase.from('payments').update(paymentDetails).eq('order_id', orderId).select().single();
+const updatePaymentStatus = async (orderId, updates) => {
+  const { error } = await supabase
+    .from('payments')
+    .update(updates)
+    .eq('order_id', orderId);
+  if (error) throw new Error(error.message);
 };
 
-module.exports = { createPaymentRecord, verifyPayment };
+module.exports = { createPaymentRecord, updatePaymentStatus };

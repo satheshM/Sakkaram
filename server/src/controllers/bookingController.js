@@ -1,121 +1,112 @@
-const supabase = require('../config/db');
-const logger = require('../config/logger');
+const { validationResult } = require('express-validator');
+const {
+  createBooking,
+  getUserBookings,
+  getOwnerBookings,
+  getBookingById,
+  updateBookingStatus,
+  deleteBooking,
+  updateBookingReview 
+} = require('../models/bookingModel');
 
-const createBooking = async (req, res) => {
+const addBooking = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
   try {
-    const { vehicleId, bookingDate, duration, totalPrice } = req.body;
-    const userId = req.user.id;
-
-    const { data, error } = await supabase.from('bookings').insert([
-      {
-        vehicle_id: vehicleId,
-        user_id: userId,
-        booking_date: bookingDate,
-        duration,
-        total_price: totalPrice,
-        status: 'Pending',
-      },
-    ]).select().single();
-
-    if (error) throw error;
-
-    res.status(201).json({ message: 'Booking created successfully', booking: data });
-  } catch (err) {
-    logger.error(`Error creating booking: ${err.message}`);
-    res.status(500).json({ message: 'Failed to create booking' });
+    
+    const newBooking = await createBooking({ farmer_id: req.user.id, ...req.body });
+    res.status(201).json({ success: true, message: 'Booking created successfully', booking: newBooking });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const getUserBookings = async (req, res) => {
+const fetchUserBookings = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { data, error } = await supabase.from('bookings').select('*').eq('user_id', userId);
-
-    if (error) throw error;
-
-    res.json({ upcoming: data.filter(b => ['Pending', 'Confirmed', 'Ongoing'].includes(b.status)), past: data.filter(b => ['Completed', 'Cancelled'].includes(b.status)) });
-  } catch (err) {
-    logger.error(`Error fetching user bookings: ${err.message}`);
-    res.status(500).json({ message: 'Failed to fetch bookings' });
+    const bookings = await getUserBookings(req.user.id);
+    const categorizedBookings = {
+      upcoming: bookings.filter((b) => ['Pending', 'Ongoing', 'Confirmed'].includes(b.status)),
+      past: bookings.filter((b) => ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)),
+    };
+    res.json({ success: true, ...categorizedBookings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const getOwnerBookings = async (req, res) => {
+const fetchOwnerBookings = async (req, res) => {
   try {
-    const ownerId = req.user.id;
-    const { data, error } = await supabase.from('bookings').select('*').eq('owner_id', ownerId);
-
-    if (error) throw error;
-
-    res.json({
-      bookingRequests: data.filter(b => b.status === 'Pending'),
-      activeBookings: data.filter(b => ['Confirmed', 'Ongoing'].includes(b.status)),
-      bookingHistory: data.filter(b => ['Completed', 'Cancelled'].includes(b.status)),
-    });
-  } catch (err) {
-    logger.error(`Error fetching owner bookings: ${err.message}`);
-    res.status(500).json({ message: 'Failed to fetch bookings' });
+    const bookings = await getOwnerBookings(req.user.id);
+    const categorizedBookings = {
+      bookingRequests: bookings.filter((b) => b.status === 'Pending'),
+      activeBookings: bookings.filter((b) => ['Ongoing', 'Confirmed'].includes(b.status)),
+      bookingHistory: bookings.filter((b) => ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)),
+    };
+    res.json({ success: true, ...categorizedBookings });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-const updateBookingStatus = async (req, res) => {
+const modifyBookingStatus = async (req, res) => {
+  const { id, status, cancellationReason } = req.body;
   try {
-    const { id, status } = req.body;
-    const userId = req.user.id;
+    const booking = await getBookingById(id);
+    if (!booking) return res.status(404).json({ success: false, error: 'Booking not found' });
 
-    const { data: booking, error: fetchError } = await supabase.from('bookings').select('id, owner_id, user_id').eq('id', id).single();
-    if (fetchError || !booking) return res.status(404).json({ message: 'Booking not found' });
+    // ✅ Only the Owner or Farmer can modify the booking
+    if (booking.owner_id !== req.user.id && booking.farmer_id !== req.user.id)
+      return res.status(403).json({ success: false, error: 'Unauthorized' });
 
-    if (booking.owner_id !== userId && booking.user_id !== userId) return res.status(403).json({ message: 'Unauthorized' });
-
-    const { data, error } = await supabase.from('bookings').update({ status }).eq('id', id).select().single();
-    if (error) throw error;
-
-    res.json({ message: 'Booking status updated', booking: data });
-  } catch (err) {
-    logger.error(`Error updating booking: ${err.message}`);
-    res.status(500).json({ message: 'Failed to update booking' });
-  }
-};
-
-const submitReview = async (req, res) => {
-  try {
-    const { bookingId, rating, feedback } = req.body;
-    const userId = req.user.id;
-
-    const { data: booking, error: fetchError } = await supabase.from('bookings').select('user_id').eq('id', bookingId).single();
-    if (fetchError || !booking) return res.status(404).json({ message: 'Booking not found' });
-
-    if (booking.user_id !== userId) return res.status(403).json({ message: 'Unauthorized' });
-
-    const { data, error } = await supabase.from('bookings').update({ rating, feedback, status: 'Reviewed' }).eq('id', bookingId).select().single();
-    if (error) throw error;
-
-    res.json({ message: 'Review submitted successfully', booking: data });
-  } catch (err) {
-    logger.error(`Error submitting review: ${err.message}`);
-    res.status(500).json({ message: 'Failed to submit review' });
+    const updatedBooking = await updateBookingStatus(id, status, cancellationReason);
+    res.json({ success: true, message: 'Booking status updated', booking: updatedBooking });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
 const cancelBooking = async (req, res) => {
   try {
-    const { id } = req.params;
-    const userId = req.user.id;
+    const booking = await getBookingById(req.params.id);
+    if (!booking) return res.status(404).json({ success: false, error: 'Booking not found' });
 
-    const { data: booking, error: fetchError } = await supabase.from('bookings').select('user_id').eq('id', id).single();
-    if (fetchError || !booking) return res.status(404).json({ message: 'Booking not found' });
+    // ✅ Only the Farmer who booked it can cancel
+    if (booking.farmer_id !== req.user.id) return res.status(403).json({ success: false, error: 'Unauthorized' });
 
-    if (booking.user_id !== userId) return res.status(403).json({ message: 'Unauthorized' });
-
-    const { error } = await supabase.from('bookings').delete().eq('id', id);
-    if (error) throw error;
-
-    res.json({ message: 'Booking cancelled successfully' });
-  } catch (err) {
-    logger.error(`Error cancelling booking: ${err.message}`);
-    res.status(500).json({ message: 'Failed to cancel booking' });
+    await deleteBooking(req.params.id);
+    res.json({ success: true, message: 'Booking cancelled successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-module.exports = { createBooking, getUserBookings, getOwnerBookings, updateBookingStatus, submitReview, cancelBooking };
+
+const submitReview = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
+
+  const { bookingId, rating, feedback, status } = req.body;
+  const userId = req.user.id; // Get authenticated user ID
+
+  try {
+    // ✅ 1️⃣ Check if the booking exists
+    const booking = await getBookingById(bookingId);
+    if (!booking) return res.status(404).json({ success: false, error: 'Booking not found' });
+
+    // ✅ 2️⃣ Ensure only the **farmer** who booked can submit a review
+    if (booking.farmer_id !== userId) {
+      return res.status(403).json({ success: false, error: 'Unauthorized to submit review' });
+    }
+
+    // ✅ 3️⃣ Update the booking with the review
+    const updatedBooking = await updateBookingReview(bookingId, rating, feedback, status);
+
+    res.json({ success: true, message: 'Successfully reviewed', booking: updatedBooking });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+module.exports = { addBooking, fetchUserBookings, fetchOwnerBookings, modifyBookingStatus, cancelBooking,submitReview };
+

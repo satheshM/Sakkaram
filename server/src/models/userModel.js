@@ -1,11 +1,27 @@
 const supabase = require('../config/db');
 
-const createUser = async (email, password, role) => {
-  return await supabase.from('users').insert([{ email, password, role }]).select().single();
+const findUserByEmail = async (email) => {
+  const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
+  if (error) return null;
+  return data;
 };
 
-const getUserByEmail = async (email) => {
-  return await supabase.from('users').select('id, email, password, role').eq('email', email).single();
+const findUserById = async (id) => {
+  const { data, error } = await supabase.from('users').select('*').eq('id', id).single();
+  if (error) return null;
+  return data;
 };
 
-module.exports = { createUser, getUserByEmail };
+const createUser = async (user) => {
+  const { data, error } = await supabase.from('users').insert([user]).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+const updateUserById = async (id, updateData) => {
+  const { data, error } = await supabase.from('users').update(updateData).eq('id', id).select().single();
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+module.exports = { findUserByEmail, findUserById, createUser, updateUserById };
