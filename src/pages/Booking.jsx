@@ -102,7 +102,7 @@ const Booking = () => {
     price: booking.totalPrice, // Mapping totalPrice -> price
     status: booking.status,
     image: booking.image, // Mapping image
-    cancellationReason: booking.cancellationReason || '', // Optional field
+    cancellationReason: booking.cancellationReason || booking.cancellation_reason ||'', // Optional field
     rating: booking.rating || null, // Optional field
     feedback: booking.feedback || '',
     farmerMsg:booking.farmerMsg, // Optional field

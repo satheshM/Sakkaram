@@ -76,7 +76,7 @@ const VehicleOwnerBookings = () => {
         if (response.status === 200) {
           const allBookings = await response.json();
 
-          setRequests(allBookings.bookingRequest.map(transformBooking) || []); // Pending bookings
+          setRequests(allBookings.bookingRequests.map(transformBooking) || []); // Pending bookings
           setActiveBookings(
             allBookings.activeBookings.map(transformBooking) || []
           ); // Ongoing bookings

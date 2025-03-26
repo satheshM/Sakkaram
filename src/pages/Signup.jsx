@@ -43,13 +43,13 @@ const Signup = () => {
     try {
       // Register the user
       const response = await registerUser(email, password, role);
-      const userData = await response.json();
+      const Data = await response.json();
 
       console.log("After signup"+JSON.stringify(response))
       
-      if (response.status === 201) {
+      if (response.status === 200) {
         // Log the user in after successful registration
-        login(userData);
+        login(Data.user);
         navigate("/");
       } else {
         setError("Registration failed. Please try again.");

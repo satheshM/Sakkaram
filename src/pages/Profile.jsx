@@ -46,7 +46,8 @@ const Profile = () => {
     const fetchUserData = async () => {
       try {
         const response = await getProfile();
-        const userData = await response.json();
+        const responseData = await response.json();
+        const userData =responseData.user
         if (response.status === 200) {
           setProfileData(userData);
           inputRefs.current = { ...userData };
