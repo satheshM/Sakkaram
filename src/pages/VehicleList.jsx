@@ -157,7 +157,8 @@ const VehicleList = () => {
         const response = await GetVehicleList();
 
         if (response.status === 200) {
-          const AllvehiclesData = await response.json();
+          const responseData = await response.json();
+          const AllvehiclesData=responseData.vehicles
 
           const transformedData = transformVehicleData(AllvehiclesData);
 
@@ -303,15 +304,15 @@ const VehicleList = () => {
   
     try {
       // Step 1: Request Backend to Create Order
-      const orderResponse = await fetch("http://localhost:5000/api/create-order", {
+      const orderResponse = await fetch("http://localhost:5000/api/payments/create-order", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
       });
   
-      const orderData = await orderResponse.json();
-  
+      const orderResponseData = await orderResponse.json();
+      const orderData =orderResponseData.order
       // Step 2: Open Razorpay Checkout
       const options = {
         key: "rzp_test_b1A45GxApr12tC", 
@@ -322,7 +323,7 @@ const VehicleList = () => {
         order_id: orderData.id,
         handler: async function (paymentResponse) {
           // Step 3: Verify Payment
-          const verifyResponse = await fetch("http://localhost:5000/api/verify-payment", {
+          const verifyResponse = await fetch("http://localhost:5000/api/payments/verify-payment", {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
