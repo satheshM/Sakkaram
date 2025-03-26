@@ -46,7 +46,8 @@ const Login = () => {
         throw new Error("No response from server. Please check your connection.");
       }
 
-      const userData = await response.json();
+      const responseData = await response.json();
+      const userData =responseData.user
 
       if (response.ok) {
         login(userData);
@@ -56,7 +57,7 @@ const Login = () => {
           case 404:
             setError('User not found. Please check your credentials.');
             break;
-          case 401:
+          case 403:
             setError('Wrong Password! Please try again.');
             break;
           default:

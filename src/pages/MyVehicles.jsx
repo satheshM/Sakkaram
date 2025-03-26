@@ -27,7 +27,9 @@ const MyVehicles = () => {
       try {
         const response = await getUserVehicle(); // Uncomment this when integrating API
         if (response.status === 200) {
-          const vehicleList = await response.json();
+          const responseData = await response.json();
+          const vehicleList =responseData.vehicles
+          
 
           setVehicles(vehicleList);
         } else {
@@ -135,11 +137,11 @@ const MyVehicles = () => {
       const response = await addVehicleAPI(newVehicleData); // Call the API function
 
       if (response.status === 201) {
-        const savedVehicle = await response.json();
+        const responseData = await response.json();
+        const newVehicle =responseData.vehicle
+        setVehicles([...vehicles, newVehicle]); // Update state with new vehicle
 
-        setVehicles([...vehicles, savedVehicle]); // Update state with new vehicle
-
-        console.log('Vehicle added successfully:', savedVehicle);
+        console.log('Vehicle added successfully:', newVehicle);
 
         // Reset form
         setNewVehicle({
@@ -240,7 +242,8 @@ const MyVehicles = () => {
         updatedVehicleData
       );
       if (response.status == 200) {
-        const updatedVehicle = await response.json();
+        const responseData = await response.json();
+        const updatedVehicle =responseData.vehicle
 
         // Update state only if API call succeeds
         setVehicles(
