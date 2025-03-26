@@ -1,34 +1,44 @@
 const express = require('express');
 const { check } = require('express-validator');
 const {
-  createBooking,
-  getUserBookings,
-  getOwnerBookings,
-  updateBookingStatus,
-  submitReview,
+  addBooking,
+  fetchUserBookings,
+  fetchOwnerBookings,
+  modifyBookingStatus, // ✅ Ensure this is imported
   cancelBooking,
+  submitReview 
 } = require('../controllers/bookingController');
 const authenticateToken = require('../middlewares/authMiddleware');
-const validateInput = require('../middlewares/validateMiddleware');
 
 const router = express.Router();
+
+router.get('/farmer', authenticateToken, fetchUserBookings);
+router.get('/owner', authenticateToken, fetchOwnerBookings);
 
 router.post(
   '/',
   authenticateToken,
-  validateInput([
+  [
     check('vehicleId').notEmpty().withMessage('Vehicle ID is required'),
     check('bookingDate').notEmpty().withMessage('Booking date is required'),
     check('duration').isNumeric().withMessage('Duration must be a number'),
-    check('totalPrice').isNumeric().withMessage('Total price must be a number'),
-  ]),
-  createBooking
+  ],
+  addBooking
 );
 
-router.get('/user', authenticateToken, getUserBookings);
-router.get('/owner', authenticateToken, getOwnerBookings);
-router.patch('/status', authenticateToken, updateBookingStatus);
-router.patch('/review', authenticateToken, submitReview);
+router.patch('/status', authenticateToken, modifyBookingStatus); // ✅ FIXED
 router.delete('/:id', authenticateToken, cancelBooking);
+
+router.patch(
+  '/submitReview',
+  authenticateToken,
+  [
+    check('bookingId').notEmpty().withMessage('Booking ID is required'),
+    check('rating').isNumeric().withMessage('Rating must be a number'),
+    check('feedback').notEmpty().withMessage('Feedback is required'),
+    check('status').notEmpty().withMessage('Status is required'),
+  ],
+  submitReview
+);
 
 module.exports = router;

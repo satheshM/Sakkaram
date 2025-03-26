@@ -1,25 +1,48 @@
-const Razorpay = require('razorpay');
-const crypto = require('crypto');
-const { createPaymentRecord, verifyPayment } = require('../models/paymentModel');
+// const Razorpay = require('razorpay');
+// const crypto = require('crypto');
+// const { createPaymentRecord, updatePaymentStatus } = require('../models/paymentModel');
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_SECRET,
-});
+// const razorpay = new Razorpay({
+//   key_id: process.env.RAZORPAY_KEY_ID,
+//   key_secret: process.env.RAZORPAY_SECRET,
+// });
 
-const createOrder = async (amount, currency = 'INR') => {
-  const options = { amount: amount * 100, currency, receipt: `receipt_${Date.now()}` };
-  return await razorpay.orders.create(options);
-};
+// const createOrder = async (bookingId, amount, currency, userId) => {
+//   const options = {
+//     amount: amount * 100, // Convert to paise
+//     currency: currency || 'INR',
+//     receipt: `receipt_${Date.now()}`,
+//   };
 
-const verifyPaymentSignature = async (orderId, paymentId, signature) => {
-  const generatedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_SECRET)
-    .update(`${orderId}|${paymentId}`)
-    .digest("hex");
+//   const order = await razorpay.orders.create(options);
 
-  if (generatedSignature !== signature) throw new Error('Payment verification failed');
+//   await createPaymentRecord({
+//     order_id: order.id,
+//     amount,
+//     currency,
+//     status: 'Pending',
+//     booking_id: bookingId,
+//     user_id: userId,
+//   });
 
-  return await verifyPayment(orderId, { payment_id: paymentId, signature, status: 'Success' });
-};
+//   return order;
+// };
 
-module.exports = { createOrder, verifyPaymentSignature };
+// const verifyPayment = async (orderId, paymentId, signature, userId) => {
+//   const generated_signature = crypto
+//     .createHmac('sha256', process.env.RAZORPAY_SECRET)
+//     .update(`${orderId}|${paymentId}`)
+//     .digest('hex');
+
+//   if (generated_signature !== signature) throw new Error('Payment verification failed');
+
+//   await updatePaymentStatus(orderId, {
+//     payment_id: paymentId,
+//     signature,
+//     status: 'Success',
+//   });
+
+//   return { success: true, message: 'Payment verified successfully' };
+// };
+
+// module.exports = { createOrder, verifyPayment };
