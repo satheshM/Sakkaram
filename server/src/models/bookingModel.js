@@ -63,10 +63,10 @@ const getBookingById = async (bookingId) => {
   return data;
 };
 
-const updateBookingStatus = async (bookingId, status, cancellationReason = null) => {
+const updateBookingStatus = async (bookingId, status, cancellationReason = null,totalPrice,total_hours) => {
   const { data, error } = await supabase
     .from('bookings')
-    .update({ status, cancellation_reason: cancellationReason })
+    .update({ status, cancellation_reason: cancellationReason,totalPrice,total_hours })
     .eq('id', bookingId)
     .select()
     .single();

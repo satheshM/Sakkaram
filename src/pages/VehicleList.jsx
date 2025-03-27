@@ -230,156 +230,156 @@ const VehicleList = () => {
 
   //handle Bookings
 
-  // const handleConfirmBooking = async () => {
-  //   if (!selectedVehicle || !bookingDate || !bookingDuration) {
-  //     alert('Please select a date and duration before confirming the booking.');
-  //     return;
-  //   }
-
-  //   const totalPrice = selectedVehicle.price * parseInt(bookingDuration);
-  
-  //   const bookingData = {
-  //     //userId, // Replace this with actual user ID from authentication
-  //     vehicleId: selectedVehicle.id,
-  //     vehicleModel: selectedVehicle.model,
-  //     vehicleType: selectedVehicle.type,
-  //     location: selectedVehicle.location,
-  //     distance: selectedVehicle.distance,
-  //     pricePerHour: selectedVehicle.price,
-  //     image: selectedVehicle.image,
-  //     bookingDate,
-  //     duration: bookingDuration,
-  //     totalPrice,
-  //     status: 'Pending',
-  //     owner: selectedVehicle.owner,
-  //     farmerMsg:farmerMsg,
-  //   };
-
-  //   try {
-  //     const response = await createBooking(bookingData);
-  //     if(response.status === 201)
-  //     {
-  //       alert('Booking confirmed successfully!');
-  //       setSelectedVehicle(null); // Close modal after booking
-  //       setBookingDuration(null)
-  //       setfarmerMsg(null)
-  //       setBookingDate(null)
-
-  //     }
-  //     else{
-  //       console.log("booking failed");
-  //     }
-
-     
-  //   } catch (error) {
-  //     console.error('Error booking vehicle:', error);
-  //     alert('Something went wrong. Please try again.');
-  //   }
-  // };
-
-  const loadRazorpayScript = () => {
-    return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
-    });
-  };
-  
   const handleConfirmBooking = async () => {
     if (!selectedVehicle || !bookingDate || !bookingDuration) {
-      alert("Please select a date and duration before confirming the booking.");
+      alert('Please select a date and duration before confirming the booking.');
       return;
     }
-  
+
     const totalPrice = selectedVehicle.price * parseInt(bookingDuration);
   
-    // Load Razorpay dynamically
-    const razorpayLoaded = await loadRazorpayScript();
-    if (!razorpayLoaded) {
-      alert("Razorpay SDK failed to load. Check your internet connection.");
-      return;
-    }
-  
+    const bookingData = {
+      //userId, // Replace this with actual user ID from authentication
+      vehicleId: selectedVehicle.id,
+      vehicleModel: selectedVehicle.model,
+      vehicleType: selectedVehicle.type,
+      location: selectedVehicle.location,
+      distance: selectedVehicle.distance,
+      pricePerHour: selectedVehicle.price,
+      image: selectedVehicle.image,
+      bookingDate,
+      duration: bookingDuration,
+      totalPrice,
+      status: 'Pending',
+      owner: selectedVehicle.owner,
+      farmerMsg:farmerMsg,
+    };
+
     try {
-      // Step 1: Request Backend to Create Order
-      const orderResponse = await fetch("http://localhost:5000/api/payments/create-order", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
-      });
-  
-      const orderResponseData = await orderResponse.json();
-      const orderData =orderResponseData.order
-      // Step 2: Open Razorpay Checkout
-      const options = {
-        key: "rzp_test_b1A45GxApr12tC", 
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Vehicle Booking",
-        description: `Booking for ${selectedVehicle.model}`,
-        order_id: orderData.id,
-        handler: async function (paymentResponse) {
-          // Step 3: Verify Payment
-          const verifyResponse = await fetch("http://localhost:5000/api/payments/verify-payment", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(paymentResponse),
-          });
-  
-          const verifyData = await verifyResponse.json();
-  
-          if (verifyData.success) {
-            // Step 4: Create Booking After Successful Payment
-            const bookingData = {
-              vehicleId: selectedVehicle.id,
-              vehicleModel: selectedVehicle.model,
-              vehicleType: selectedVehicle.type,
-              location: selectedVehicle.location,
-              distance: selectedVehicle.distance,
-              pricePerHour: selectedVehicle.price,
-              image: selectedVehicle.image,
-              bookingDate,
-              duration: bookingDuration,
-              totalPrice,
-              status: "Pending", // Payment Successful
-              owner: selectedVehicle.owner,
-              farmerMsg: farmerMsg,
-            };
-  
-            const response = await createBooking(bookingData);
-            if (response.status === 201) {
-              alert("Booking confirmed successfully!");
-              setSelectedVehicle(null);
-              setBookingDuration(null);
-              setfarmerMsg(null);
-              setBookingDate(null);
-            } else {
-              console.log("Booking failed");
-            }
-          } else {
-            alert("Payment verification failed.");
-          }
-        },
-        prefill: {
-          name: "User Name",
-          email: "user@example.com",
-          contact: "9876543210",
-        },
-        theme: { color: "#3399cc" },
-      };
-  
-      const razorpayInstance = new window.Razorpay(options);
-      razorpayInstance.open();
+      const response = await createBooking(bookingData);
+      if(response.status === 201)
+      {
+        alert('Booking confirmed successfully!');
+        setSelectedVehicle(null); // Close modal after booking
+        setBookingDuration(null)
+        setfarmerMsg(null)
+        setBookingDate(null)
+
+      }
+      else{
+        console.log("booking failed");
+      }
+
+     
     } catch (error) {
-      console.error("Error processing payment:", error);
-      alert("Something went wrong. Please try again.");
+      console.error('Error booking vehicle:', error);
+      alert('Something went wrong. Please try again.');
     }
-  
   };
+
+  // const loadRazorpayScript = () => {
+  //   return new Promise((resolve) => {
+  //     const script = document.createElement("script");
+  //     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+  //     script.onload = () => resolve(true);
+  //     script.onerror = () => resolve(false);
+  //     document.body.appendChild(script);
+  //   });
+  // };
+  
+  // const handleConfirmBooking = async () => {
+  //   if (!selectedVehicle || !bookingDate || !bookingDuration) {
+  //     alert("Please select a date and duration before confirming the booking.");
+  //     return;
+  //   }
+  
+  //   const totalPrice = selectedVehicle.price * parseInt(bookingDuration);
+  
+  //   // Load Razorpay dynamically
+  //   const razorpayLoaded = await loadRazorpayScript();
+  //   if (!razorpayLoaded) {
+  //     alert("Razorpay SDK failed to load. Check your internet connection.");
+  //     return;
+  //   }
+  
+  //   try {
+  //     // Step 1: Request Backend to Create Order
+  //     const orderResponse = await fetch("http://localhost:5000/api/payments/create-order", {
+  //       method: "POST",
+  //       credentials: "include",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ amount: totalPrice, currency: "INR" }),
+  //     });
+  
+  //     const orderResponseData = await orderResponse.json();
+  //     const orderData =orderResponseData.order
+  //     // Step 2: Open Razorpay Checkout
+  //     const options = {
+  //       key: "rzp_test_b1A45GxApr12tC", 
+  //       amount: orderData.amount,
+  //       currency: orderData.currency,
+  //       name: "Vehicle Booking",
+  //       description: `Booking for ${selectedVehicle.model}`,
+  //       order_id: orderData.id,
+  //       handler: async function (paymentResponse) {
+  //         // Step 3: Verify Payment
+  //         const verifyResponse = await fetch("http://localhost:5000/api/payments/verify-payment", {
+  //           method: "POST",
+  //           credentials: "include",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify(paymentResponse),
+  //         });
+  
+  //         const verifyData = await verifyResponse.json();
+  
+  //         if (verifyData.success) {
+  //           // Step 4: Create Booking After Successful Payment
+  //           const bookingData = {
+  //             vehicleId: selectedVehicle.id,
+  //             vehicleModel: selectedVehicle.model,
+  //             vehicleType: selectedVehicle.type,
+  //             location: selectedVehicle.location,
+  //             distance: selectedVehicle.distance,
+  //             pricePerHour: selectedVehicle.price,
+  //             image: selectedVehicle.image,
+  //             bookingDate,
+  //             duration: bookingDuration,
+  //             totalPrice,
+  //             status: "Pending", // Payment Successful
+  //             owner: selectedVehicle.owner,
+  //             farmerMsg: farmerMsg,
+  //           };
+  
+  //           const response = await createBooking(bookingData);
+  //           if (response.status === 201) {
+  //             alert("Booking confirmed successfully!");
+  //             setSelectedVehicle(null);
+  //             setBookingDuration(null);
+  //             setfarmerMsg(null);
+  //             setBookingDate(null);
+  //           } else {
+  //             console.log("Booking failed");
+  //           }
+  //         } else {
+  //           alert("Payment verification failed.");
+  //         }
+  //       },
+  //       prefill: {
+  //         name: "User Name",
+  //         email: "user@example.com",
+  //         contact: "9876543210",
+  //       },
+  //       theme: { color: "#3399cc" },
+  //     };
+  
+  //     const razorpayInstance = new window.Razorpay(options);
+  //     razorpayInstance.open();
+  //   } catch (error) {
+  //     console.error("Error processing payment:", error);
+  //     alert("Something went wrong. Please try again.");
+  //   }
+  
+  // };
   
 
   return (

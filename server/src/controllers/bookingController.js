@@ -26,8 +26,19 @@ const fetchUserBookings = async (req, res) => {
   try {
     const bookings = await getUserBookings(req.user.id);
     const categorizedBookings = {
-      upcoming: bookings.filter((b) => ['Pending', 'Ongoing', 'Confirmed'].includes(b.status)),
-      past: bookings.filter((b) => ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)),
+      // upcoming: bookings.filter((b) => ['Pending', 'Ongoing', 'Confirmed'].includes(b.status)),
+      upcoming: bookings.filter(
+        (b) =>
+          ['Pending', 'Ongoing','Confirmed'].includes(b.status) ||
+          (b.status === 'Completed' && b.payment_status === 'Pending') // Include Confirmed only if payment is Pending
+      ),
+      // past: bookings.filter((b) => ['Completed', 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status)),
+      past: bookings.filter(
+        (b) =>
+          [ 'Cancelled', 'Rejected', 'Reviewed'].includes(b.status) ||
+          (b.status === 'Completed' && b.payment_status !== 'Pending') // Move Confirmed to past if payment is not Pending
+      )
+    
     };
     res.json({ success: true, ...categorizedBookings });
   } catch (error) {
@@ -50,8 +61,9 @@ const fetchOwnerBookings = async (req, res) => {
 };
 
 const modifyBookingStatus = async (req, res) => {
-  const { id, status, cancellationReason } = req.body;
+  const { id, status, cancellationReason,totalPrice,total_hours } = req.body;
   try {
+    console.log("totalPrice"+totalPrice+"total_hours"+total_hours)
     const booking = await getBookingById(id);
     if (!booking) return res.status(404).json({ success: false, error: 'Booking not found' });
 
@@ -59,7 +71,7 @@ const modifyBookingStatus = async (req, res) => {
     if (booking.owner_id !== req.user.id && booking.farmer_id !== req.user.id)
       return res.status(403).json({ success: false, error: 'Unauthorized' });
 
-    const updatedBooking = await updateBookingStatus(id, status, cancellationReason);
+    const updatedBooking = await updateBookingStatus(id, status, cancellationReason,totalPrice,total_hours);
     res.json({ success: true, message: 'Booking status updated', booking: updatedBooking });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
