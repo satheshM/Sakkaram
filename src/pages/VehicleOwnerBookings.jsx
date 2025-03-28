@@ -49,10 +49,47 @@ const VehicleOwnerBookings = () => {
   const [requests, setRequests] = useState([]);
   const [activeBookings, setActiveBookings] = useState([]);
   const [bookingHistory, setBookingHistory] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+    const [utilizationTime, setUtilizationTime] = useState("");
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [CurrentBooking, setCurrentBooking] = useState([]);
+
+
+    const handleMarkCompleted = () => {
+      setIsModalOpen(true); // Open the popup
+    };
+
+    const handleInputChange = (e) => {
+      const time = e.target.value;
+      setUtilizationTime(time);
+
+      const [hours, minutes] = time.split(":").map(Number);
+
+  // Convert to decimal hours (e.g., "1:30" → 1.5)
+  const totalHours = hours + minutes / 60;
+  
+      // Calculate the total amount
+      const amount = totalHours * CurrentBooking.pricePerHour;
+      console.log(CurrentBooking)
+      setTotalAmount(amount);
+    };
+
+    const handleSubmit = () => {
+
+      
+      // Send data to the `kathmanduCompleted` function
+     completeBooking(CurrentBooking.id,totalAmount,utilizationTime)
+     setCurrentBooking([])
+      // Close the modal
+      setIsModalOpen(false);
+      setUtilizationTime("");
+      setTotalAmount(0);
+    };
 
   const transformBooking = (booking) => ({
     id: booking.id, // Keep the same ID
     farmer: booking.owner, // Assuming 'owner' refers to the farmer
+    pricePerHour:booking.pricePerHour,
     farmerPhone: '000-000-0000', // No phone number available in the input data
     vehicle: `${booking.vehicleModel} ${booking.vehicleType}`, // Combine model & type
     vehicleId: booking.vehicleId, // Keep vehicle ID
@@ -230,11 +267,13 @@ const confirmBooking = async (id) => {
 };
 
   // Mark booking as complete
-  const completeBooking = async (id) => {
+  const completeBooking = async (id,TotalAmount,totalHours) => {
     const payload = {
       id: id,
       status: 'Completed',
       cancellationReason: '',
+      totalPrice:TotalAmount,
+      total_hours:totalHours
     };
     const response = await UpdateBookingStatus(payload);
 
@@ -351,6 +390,49 @@ const confirmBooking = async (id) => {
           Manage Bookings
         </h1>
 
+       
+      {/* Modal Popup */}
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-lg font-semibold text-gray-800 text-center">
+              Enter Utilization Time (in hours)
+            </h3>
+
+            {/* Input Field */}
+            <input
+  type="time"
+  step="1800"  // Allows selecting time in 30-minute intervals
+  value={utilizationTime}
+  onChange={handleInputChange}
+  className="w-full mt-3 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+/>
+
+            {/* Total Amount Display */}
+            <p className="mt-3 text-lg font-semibold text-center">
+              Total Amount:{" "}
+              <span className="text-green-600">₹{totalAmount.toFixed(2)}</span>
+            </p>
+
+            {/* Buttons */}
+            <div className="flex justify-center space-x-3 mt-4">
+              <button
+                onClick={handleSubmit}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
         {/* Tabs */}
         <div className="bg-white rounded-lg shadow-md mb-6">
           <div className="flex border-b">
@@ -446,12 +528,12 @@ const confirmBooking = async (id) => {
                     <div className="flex items-center">
                       <FaCalendarAlt className="mr-2 text-green-500" />
                       <span>
-                        {new Date(booking.date).toLocaleDateString('en-US', {
+                        { booking.date ? new Date(booking.date).toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
                           month: 'long',
                           day: 'numeric',
-                        })}
+                        }):''}
                       </span>
                     </div>
                     <div className="flex items-center">
@@ -520,7 +602,9 @@ const confirmBooking = async (id) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          completeBooking(booking.id);
+                          setCurrentBooking(booking)
+                          handleMarkCompleted(booking.id)
+                          //completeBooking(booking.id);
                         }}
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
                       >

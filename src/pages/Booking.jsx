@@ -99,7 +99,8 @@ const Booking = () => {
     date: booking.bookingDate, // Mapping bookingDate -> date
     time: `Duration: ${booking.duration} hr(s)`, // Formatting time field
     location: booking.location,
-    price: booking.totalPrice, // Mapping totalPrice -> price
+    price: booking.totalPrice, 
+    paymentStatus:booking.payment_status,// Mapping totalPrice -> price
     status: booking.status,
     image: booking.image, // Mapping image
     cancellationReason: booking.cancellationReason || booking.cancellation_reason ||'', // Optional field
@@ -225,9 +226,86 @@ const Booking = () => {
   };
   
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
 
-
-
+const handlePayment = async (bookings) => {
+  
+  
+  
+    const totalPrice = bookings.price
+  
+    // Load Razorpay dynamically
+    const razorpayLoaded = await loadRazorpayScript();
+    if (!razorpayLoaded) {
+      alert("Razorpay SDK failed to load. Check your internet connection.");
+      return;
+    }
+  
+    try {
+      // Step 1: Request Backend to Create Order
+      const orderResponse = await fetch("http://localhost:5000/api/payments/create-order", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId:bookings.id,amount: totalPrice, currency: "INR" }),
+      });
+  
+      const orderResponseData = await orderResponse.json();
+      const orderData =orderResponseData.order
+      // Step 2: Open Razorpay Checkout
+      const options = {
+        key: "rzp_test_b1A45GxApr12tC", 
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Sakkaram Booking",
+        description: `Booking for ${bookings.vehicleName}`,
+        order_id: orderData.id,
+        handler: async function (paymentResponse) {
+          // Step 3: Verify Payment
+          const verifyResponse = await fetch("http://localhost:5000/api/payments/verify-payment", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(paymentResponse),
+          });
+  
+          const verifyData = await verifyResponse.json();
+  
+          if (verifyData.success) {
+            
+            //show success Payment Popup
+            alert("Payment received")
+  
+           
+            
+          } else {
+            alert("Payment verification failed.");
+          }
+        },
+        prefill: {
+          name: "User Name",
+          email: "user@example.com",
+          contact: "9876543210",
+        },
+        theme: { color: "#3399cc" },
+      };
+  
+      const razorpayInstance = new window.Razorpay(options);
+      razorpayInstance.open();
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Something went wrong. Please try again.");
+    }
+  
+  };
 
 
 
@@ -412,7 +490,7 @@ const Booking = () => {
                       </p>
                     </div>
 
-                    {booking.status === 'Completed' && !booking.rating && (
+                    {booking.status === 'Completed' && !booking.rating && booking.paymentStatus === 'Completed'&& (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -421,6 +499,18 @@ const Booking = () => {
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
                       >
                         Leave Review
+                      </button>
+                    )}
+
+                    {booking.status === 'Completed' && booking.paymentStatus === 'Pending' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePayment(booking)
+                        }}
+                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      >
+                        Pay Now
                       </button>
                     )}
 
