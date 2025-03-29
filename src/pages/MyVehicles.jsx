@@ -7,6 +7,7 @@ import {
   FaCalendarAlt,
   FaToggleOn,
   FaToggleOff,
+  FaMapMarkerAlt  
 } from 'react-icons/fa';
 import {
   addVehicle as addVehicleAPI,
@@ -637,7 +638,7 @@ const MyVehicles = () => {
                   </p>
 
                   <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <FaCalendarAlt className="mr-1" />
+                    <FaMapMarkerAlt  className="mr-1" />
                     <span>{vehicle.location}</span>
                   </div>
 
