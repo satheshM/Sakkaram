@@ -240,7 +240,8 @@ const handlePayment = async (bookings) => {
   
   
   
-    const totalPrice = bookings.price
+    //const totalPrice = bookings.price
+    const totalPrice = parseInt(bookings.price, 10); 
   
     // Load Razorpay dynamically
     const razorpayLoaded = await loadRazorpayScript();

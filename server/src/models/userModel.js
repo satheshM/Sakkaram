@@ -1,4 +1,5 @@
 const supabase = require('../config/db');
+const { createWallet } = require('./walletModel');
 
 const findUserByEmail = async (email) => {
   const { data, error } = await supabase.from('users').select('*').eq('email', email).single();
@@ -15,6 +16,13 @@ const findUserById = async (id) => {
 const createUser = async (user) => {
   const { data, error } = await supabase.from('users').insert([user]).select().single();
   if (error) throw new Error(error.message);
+
+  try {
+    await createWallet(data.id); // Pass user_id to wallet
+  } catch (walletError) {
+    console.error("Wallet creation failed:", walletError);
+    throw new Error("User created but wallet creation failed");
+  }
   return data;
 };
 
