@@ -240,7 +240,7 @@ const Earnings = () => {
             </div>
             
             {/* Monthly Earnings Chart */}
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+            {/* <div className="bg-white p-6 rounded-lg shadow-md mb-6">
               <h2 className="text-lg font-semibold mb-4">Monthly Earnings</h2>
               <div className="h-64 flex items-end justify-between px-2">
                 {earnings.monthlyEarnings.map((month, index) => {
@@ -259,7 +259,42 @@ const Earnings = () => {
                   );
                 })}
               </div>
-            </div>
+            </div> */}
+
+<div className="bg-white p-6 rounded-lg shadow-md mb-6">
+  <h2 className="text-lg font-semibold mb-4">Monthly Earnings</h2>
+  <div className="h-64 flex items-end justify-between px-2 gap-4">
+    {earnings.monthlyEarnings.map((month, index) => {
+      const percentage = (month.amount / highestEarningMonth.amount) * 100;
+      const isHighest = month.month === highestEarningMonth.month;
+
+      return (
+        <div key={index} className="flex flex-col items-center group">
+          {/* Bar with Gradient and Hover Effects */}
+          <div 
+            className={`w-10 rounded-t-md transition-all duration-300 ${
+              isHighest ? "bg-gradient-to-b from-green-500 to-green-700" : "bg-gradient-to-b from-green-300 to-green-500"
+            } group-hover:scale-105`}
+            style={{ height: `${percentage}%`, minHeight: '20px' }}
+          >
+            <span className="hidden group-hover:block text-white text-sm font-bold mt-1">
+              ₹{month.amount.toLocaleString()}
+            </span>
+          </div>
+
+          {/* Month Label */}
+          <div className="text-sm font-medium mt-2 text-gray-600">{month.month}</div>
+          
+          {/* Amount on hover */}
+          <div className={`text-sm font-semibold ${isHighest ? "text-green-600" : "text-gray-700"}`}>
+            ₹{month.amount.toLocaleString()}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
             
             {/* Vehicle Performance */}
             <div className="bg-white p-6 rounded-lg shadow-md mb-6">
