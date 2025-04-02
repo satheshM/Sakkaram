@@ -221,7 +221,9 @@ const Wallet = () => {
                 <div key={tx.id} className="flex justify-between items-center border-b border-gray-100 py-4 last:border-0">
                   <div className="flex items-center">
                     <span className={`px-4 py-1.5 rounded-full text-sm font-medium ${getTransactionColor(tx.type)}`}>
-                      {tx.type === 'deposit' ? 'Added' : 'Withdrawn'}
+                      {/* {tx.type === 'deposit' ? 'Added' : 'Withdrawn'} */}
+                      {tx.type}
+
                     </span>
                     <span className="ml-4 font-medium text-gray-900">
                       {formatCurrency(tx.amount)}

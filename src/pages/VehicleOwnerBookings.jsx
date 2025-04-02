@@ -404,6 +404,7 @@ const confirmBooking = async (id) => {
   type="time"
   step="1800"  // Allows selecting time in 30-minute intervals
   value={utilizationTime}
+  required
   onChange={handleInputChange}
   className="w-full mt-3 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
 />
@@ -418,6 +419,7 @@ const confirmBooking = async (id) => {
             <div className="flex justify-center space-x-3 mt-4">
               <button
                 onClick={handleSubmit}
+                disabled={utilizationTime<=0}
                 className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
               >
                 Confirm

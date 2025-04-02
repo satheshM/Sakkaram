@@ -49,5 +49,12 @@ export const api = {
       withCredentials: true, // Enable sending cookies
     });
     return response.data;
-  }
+  },
+
+  async payWithWallet(paymentData) {
+    const response = await axios.post(`${API_URL}/wallet/payment/pay`, paymentData, {
+      withCredentials: true, // Enable sending cookies
+    });
+    return response.data;
+  },
 };
