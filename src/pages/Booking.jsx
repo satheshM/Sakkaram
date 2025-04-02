@@ -13,7 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 import { GetUserBookings,submitReview as postReview,UpdateBookingStatus  } from '../api/Bookings';
-
+import { api  } from '../api/wallet';
 const Booking = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -170,7 +170,76 @@ const Booking = () => {
   // };
 
 
+ 
 
+  const PaymentButton = ({ booking }) => {
+    
+  
+   
+  
+    return (
+      // <div className="relative">
+      //   <button
+      //     onClick={handleClick}
+      //     className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+      //   >
+      //     Pay Now
+      //   </button>
+  
+      //   {showOptions && (
+      //     <div className="absolute left-0 -top-20 bg-white border rounded shadow-lg">
+      //       <button
+      //         onClick={() => {
+      //           handlePayment(booking, 'wallet');
+      //           setShowOptions(false); // Close options after selection
+      //         }}
+      //         className="block px-4 py-2 text-sm text-blue-500 hover:bg-gray-100"
+      //       >
+      //         Wallet
+      //       </button>
+      //       <button
+      //         onClick={() => {
+      //           handlePayment(booking, 'razorpay');
+      //           setShowOptions(false); // Close options after selection
+      //         }}
+      //         className="block px-4 py-2 text-sm text-blue-500 hover:bg-gray-100"
+      //       >
+      //         Razorpay
+      //       </button>
+      //     </div>
+      //   )}
+      // </div>
+
+      <div className="relative group">
+  <button
+    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+  >
+    Pay Now
+  </button>
+
+  <div className="absolute left-0 -top-20 bg-white border rounded shadow-lg opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-[400ms] ease-in-out">
+    <button
+      onClick={() => handlePayment(booking,'wallet')}
+      className="block px-4 py-2 text-sm text-blue-500 hover:bg-gray-100 w-full"
+    >
+      Wallet 
+    </button>
+    <button
+      onClick={() => handlePayment(booking)}
+      className="block px-4 py-2 text-sm text-blue-500 hover:bg-gray-100"
+    >
+      Razorpay
+    </button>
+  </div>
+</div>
+
+    
+
+    );
+  };
+  
+  
+  
   const cancelBooking = async () => {
     if (!cancellationReason.trim()) {
       alert('Please provide a reason for cancellation');
@@ -236,7 +305,16 @@ const Booking = () => {
     });
   };
 
-const handlePayment = async (bookings) => {
+const handlePayment = async (bookings,payMode) => {
+
+  if(payMode === 'wallet')
+  {
+    const response=await api.payWithWallet(bookings)
+    if(response)
+      alert("Payment received")
+    console.log(JSON.stringify(response))
+    return 
+  }
   
   
   
@@ -504,15 +582,17 @@ const handlePayment = async (bookings) => {
                     )}
 
                     {booking.status === 'Completed' && booking.paymentStatus === 'Pending' && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePayment(booking)
-                        }}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                      >
-                        Pay Now
-                      </button>
+                      // <button
+                      //   onClick={(e) => {
+                      //     e.stopPropagation();
+                      //     handlePayment(booking)
+                      //   }}
+                      //   className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+                      // >
+                      //   Pay Now
+                      // </button>
+                      <PaymentButton booking={booking} />
+
                     )}
 
                     {booking.status === 'Confirmed' && (
@@ -707,7 +787,7 @@ const handlePayment = async (bookings) => {
                   )}
 
                 {selectedBooking.status === 'Completed' &&
-                  !selectedBooking.rating && (
+                  !selectedBooking.rating && selectedBooking.paymentStatus === 'Completed' && (
                     <div className="mb-6">
                       <h3 className="font-semibold mb-2">Leave a Review</h3>
                       <ReviewForm

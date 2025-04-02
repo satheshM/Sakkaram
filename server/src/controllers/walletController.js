@@ -193,10 +193,107 @@ const withdrawMoney = async (req, res) => {
   }
 };
 
+
+
+const PayforBooking = async (req, res) => {
+  try {
+    const { price,id } = req.body;
+    const userId = req.user.id
+
+    // Fetch Balance
+    const { data: wallet, error: walletError } = await supabase
+      .from("wallets")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (walletError) throw new Error("Error fetching wallet balance");
+    if (price > wallet.balance) throw new Error("Insufficient Balance");
+
+    const newBalance = wallet.balance-price;
+
+    // ✅ Update Wallet Balance
+    const { error: updateError } = await supabase
+      .from("wallets")
+      .update({ balance: newBalance })
+      .eq("user_id", userId);
+
+    if (updateError) throw new Error("Failed to update wallet balance");
+    // Record Transaction
+    const {error: transUpdateError}=await supabase.from("transactions").insert({
+      wallet_id: wallet.id,
+      type: "paid",
+      amount:price,
+      reference_id: `withdraw_${Date.now()}`,
+      status: "Success",
+    });
+   
+
+
+   
+      const { data:bookings, error } = await supabase
+        .from('bookings')
+        .update({ payment_status:"Completed" })
+        .eq('id', id)
+        .select()
+        .single();
+
+        if (error) throw new Error("Error booking updation");
+
+
+/// owner wallet update
+
+        const { data: ownerwallet, error: ownerwalletError } = await supabase
+        .from("wallets")
+        .select("*")
+        .eq("user_id", bookings.owner_id)
+        .single();
+  
+      if (ownerwalletError) throw new Error("Error fetching owner wallet balance");
+      
+  
+      const ownerNewBalance = ownerwallet.balance+price;
+
+
+
+        const { error: ownerWalletUptError } = await supabase
+        .from("wallets")
+        .update({ balance: ownerNewBalance })
+        .eq("user_id", bookings.owner_id);
+  
+      if (ownerWalletUptError) throw new Error("Failed to update owner wallet balances");
+      // Record Transaction
+      const {error: ownertransUpdateError}=await supabase.from("transactions").insert({
+        wallet_id: ownerwallet.id,
+        type: "deposit",
+        amount:price,
+        reference_id: `withdraw_${Date.now()}`,
+        status: "Success",
+      });
+
+      if (ownertransUpdateError) throw new Error("Failed to update owner transaction  update"+JSON.stringify(ownertransUpdateError));
+    
+    
+
+    
+
+   
+
+
+
+
+
+    res.status(200).json({ message: "Payment received  successful"});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getWalletBalance,
   getTransactions,
   createPayment,
   verifyPayment,
   withdrawMoney,
+  PayforBooking
 };
