@@ -15,6 +15,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const profileRoute = require('./routes/profileRoutes');
 const walletRoutes = require("./routes/walletRoutes");
+const EarningsRoutes = require("./routes/earningsRoutes");
 
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use("/api/wallet", walletRoutes);
+app.use("/api/earnings", EarningsRoutes);
 
 // ❌ Global Error Handling Middleware
 app.use((err, req, res, next) => {

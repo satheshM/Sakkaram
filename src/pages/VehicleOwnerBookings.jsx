@@ -95,9 +95,9 @@ const VehicleOwnerBookings = () => {
     vehicleId: booking.vehicleId, // Keep vehicle ID
     status: booking.status, // Status remains the same
     date: booking.bookingDate, // Use `bookingDate` for the date
-    time: `${booking.duration} hour(s)`, // Show duration as time
+    time:`${booking.total_hours} hour(s)` || 0, // Show duration as time
     location: booking.location, // Location remains the same
-    price: booking.totalPrice, // Use total price
+    //price: booking.totalPrice, // Use total price
     rating: booking.rating || 0, // If rating exists, use it; otherwise, null
     feedback: booking.feedback || '', // If feedback exists, use it; otherwise, empty string
     image: booking.image, // Use the vehicle image
@@ -548,7 +548,7 @@ const confirmBooking = async (id) => {
                     <div>
                       <p className="text-xs text-gray-500">Amount</p>
                       <p className="font-bold text-green-600">
-                        ₹{booking.price.toLocaleString()}
+                        ₹{booking.pricePerHour.toLocaleString()}
                       </p>
                     </div>
 
@@ -809,14 +809,14 @@ const confirmBooking = async (id) => {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="flex justify-between mb-2">
                       <span>Rental Charge</span>
-                      <span>₹{selectedBooking.price.toLocaleString()}</span>
+                      <span>₹{selectedBooking.pricePerHour.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between mb-2">
                       <span>Service Fee</span>
                       <span>
                         ₹
                         {Math.round(
-                          selectedBooking.price * 0.05
+                          selectedBooking.pricePerHour * 0.05
                         ).toLocaleString()}
                       </span>
                     </div>
@@ -825,7 +825,7 @@ const confirmBooking = async (id) => {
                       <span>
                         ₹
                         {Math.round(
-                          selectedBooking.price * 1.05
+                          selectedBooking.pricePerHour * 1.05
                         ).toLocaleString()}
                       </span>
                     </div>

@@ -197,7 +197,7 @@ const withdrawMoney = async (req, res) => {
 
 const PayforBooking = async (req, res) => {
   try {
-    const { price,id } = req.body;
+    const { price,id:bookingid } = req.body;
     const userId = req.user.id
 
     // Fetch Balance
@@ -224,7 +224,7 @@ const PayforBooking = async (req, res) => {
       wallet_id: wallet.id,
       type: "paid",
       amount:price,
-      reference_id: `withdraw_${Date.now()}`,
+      reference_id: `paid_${Date.now()}`,
       status: "Success",
     });
    
@@ -234,11 +234,11 @@ const PayforBooking = async (req, res) => {
       const { data:bookings, error } = await supabase
         .from('bookings')
         .update({ payment_status:"Completed" })
-        .eq('id', id)
+        .eq('id', bookingid)
         .select()
         .single();
 
-        if (error) throw new Error("Error booking updation");
+        if (error) throw new Error("Error booking updation"+JSON.stringify(error));
 
 
 /// owner wallet update
@@ -267,8 +267,9 @@ const PayforBooking = async (req, res) => {
         wallet_id: ownerwallet.id,
         type: "deposit",
         amount:price,
-        reference_id: `withdraw_${Date.now()}`,
+        reference_id: `earning_${Date.now()}`,
         status: "Success",
+        booking_id:bookingid
       });
 
       if (ownertransUpdateError) throw new Error("Failed to update owner transaction  update"+JSON.stringify(ownertransUpdateError));

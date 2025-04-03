@@ -61,13 +61,61 @@ const updatePaymentStatus = async (orderId, updates) => {
 
   // Step 2: If payment is successful, update the bookings table
   if (updates.status === 'Success') {
-    const { error: bookingError } = await supabase
+   
+      const { data:bookings, error: bookingError  } = await supabase
       .from('bookings')
-      .update({ payment_status: 'Completed' }) // Correct syntax
-      .eq('id', paymentData.booking_id); // Use paymentData.booking_id
+      .update({ payment_status:"Completed" })
+      .eq('id', paymentData.booking_id)
+      .select()
+      .single();
+
 
     if (bookingError) {
       throw new Error(bookingError.message);
+    }
+    else{
+
+      try{
+
+        const { data: ownerwallet, error: ownerwalletError } = await supabase
+          .from("wallets")
+          .select("*")
+          .eq("user_id", bookings.owner_id)
+          .single();
+    
+        if (ownerwalletError) throw new Error("Error fetching owner wallet balance");
+        
+    
+        const ownerNewBalance = ownerwallet.balance+bookings.totalPrice;
+  
+  
+  
+          const { error: ownerWalletUptError } = await supabase
+          .from("wallets")
+          .update({ balance: ownerNewBalance })
+          .eq("user_id", bookings.owner_id);
+    
+        if (ownerWalletUptError) throw new Error("Failed to update owner wallet balances");
+        // Record Owner Transaction
+        const {error: ownertransUpdateError}=await supabase.from("transactions").insert({
+          wallet_id: ownerwallet.id,
+          type: "deposit",
+          amount:bookings.totalPrice,
+          reference_id: `earning_${Date.now()}`,
+          status: "Success",
+          booking_id:paymentData.booking_id
+        });
+  
+        if (ownertransUpdateError) throw new Error("Failed to update owner transaction  update"+JSON.stringify(ownertransUpdateError));
+      
+      
+  
+     }
+      catch (error) {
+        return error
+      }
+
+
     }
   }
 };

@@ -97,9 +97,9 @@ const Booking = () => {
     ownerName: booking.owner, // Mapping owner -> ownerName
     ownerPhone: booking.ownerPhone || '+91 0000000000', // Default phone if not present
     date: booking.bookingDate, // Mapping bookingDate -> date
-    time: `Duration: ${booking.duration} hr(s)`, // Formatting time field
+    time: `Duration: ${booking.total_hours} hr(s)`, // Formatting time field
     location: booking.location,
-    price: booking.totalPrice, 
+    price: booking.totalPrice || 0, 
     paymentStatus:booking.payment_status,// Mapping totalPrice -> price
     status: booking.status,
     image: booking.image, // Mapping image
