@@ -21,7 +21,7 @@ router.post(
   [
     check('vehicleId').notEmpty().withMessage('Vehicle ID is required'),
     check('bookingDate').notEmpty().withMessage('Booking date is required'),
-    check('duration').isNumeric().withMessage('Duration must be a number'),
+    
   ],
   addBooking
 );

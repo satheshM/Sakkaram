@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { FaChartLine, FaCalendarAlt, FaTractor, FaWallet, FaDownload, FaExclamationCircle } from "react-icons/fa";
-
+import {getOwnerTransactions} from '../api/earnings'
 const Earnings = () => {
   // Sample Earnings Data
   const [earnings, setEarnings] = useState({
@@ -68,6 +68,36 @@ const Earnings = () => {
       farmer: "Suresh Patel"
     },
   ]);
+
+// fetch transaction from API
+
+ useEffect(() => {
+    const fetchOwnerTransactions = async () => {
+      try {
+        const response = await getOwnerTransactions();
+
+        if (response.status === 200) {
+          const transactions = await response.json();
+
+          setTransactions(transactions.transactions.data);
+        } else {
+          console.log('failed to fetch Owner Transactions');
+        }
+      } catch (error) {
+        console.error('Error fetching Owner Transactions:', error);
+      }
+    };
+
+    fetchOwnerTransactions();
+  }, []);
+
+
+
+
+
+
+
+
 
   // Withdrawal Handling
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -374,9 +404,9 @@ const Earnings = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            txn.status === "Completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                            txn.status === "Success" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                           }`}>
-                            {txn.status}
+                            {txn.status ==='Success'?'Completed':'Failed'}
                           </span>
                         </td>
                       </tr>
@@ -439,9 +469,9 @@ const Earnings = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          txn.status === "Completed" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                          txn.status === "Success" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                         }`}>
-                          {txn.status}
+                          {txn.status ==='Success'?'Completed':'failed'}
                         </span>
                       </td>
                     </tr>

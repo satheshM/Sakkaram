@@ -128,7 +128,7 @@ const VehicleList = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [bookingDate, setBookingDate] = useState('');
-  const [bookingDuration, setBookingDuration] = useState('1');
+  
   const [farmerMsg, setfarmerMsg] = useState('');
 
   const transformVehicleData = (backendData) => {
@@ -231,12 +231,12 @@ const VehicleList = () => {
   //handle Bookings
 
   const handleConfirmBooking = async () => {
-    if (!selectedVehicle || !bookingDate || !bookingDuration) {
+    if (!selectedVehicle || !bookingDate) {
       alert('Please select a date and duration before confirming the booking.');
       return;
     }
 
-    const totalPrice = selectedVehicle.price * parseInt(bookingDuration);
+    
   
     const bookingData = {
       //userId, // Replace this with actual user ID from authentication
@@ -248,8 +248,6 @@ const VehicleList = () => {
       pricePerHour: selectedVehicle.price,
       image: selectedVehicle.image,
       bookingDate,
-      duration: bookingDuration,
-      totalPrice,
       status: 'Pending',
       owner: selectedVehicle.owner,
       farmerMsg:farmerMsg,
@@ -261,7 +259,7 @@ const VehicleList = () => {
       {
         alert('Booking confirmed successfully!');
         setSelectedVehicle(null); // Close modal after booking
-        setBookingDuration(null)
+      
         setfarmerMsg(null)
         setBookingDate(null)
 
@@ -760,22 +758,7 @@ const VehicleList = () => {
                         min={new Date().toISOString().split('T')[0]}
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Duration(Hour's)
-                      </label>
-                      <select
-                        value={bookingDuration}
-                        onChange={(e) => setBookingDuration(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                      >
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
-                        <option>4</option>
-                      
-                      </select>
-                    </div>
+                    
 
 
                     {/* <div className="mb-6">
@@ -784,9 +767,11 @@ const VehicleList = () => {
                       <p className="text-gray-700">{"sample msg"}</p>
                     </div>
                   </div> */}
-                  <h3 className="font-semibold mb-2 text-red-700">
+                  <br></br>
+                  <h3 className="font-semibold mb-2 text-green-700">
                       Message to the Owner
                     </h3>
+                    <br></br>
                     <textarea
                       value={farmerMsg}
                       onChange={(e) => setfarmerMsg(e.target.value)}
@@ -802,9 +787,9 @@ const VehicleList = () => {
 
                 <div className="border-t pt-4 flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-gray-500">Total Estimate</p>
+                    <p className="text-sm text-gray-500">Per hour</p>
                     <p className="text-2xl font-bold">
-                      ₹{selectedVehicle.price * parseInt(bookingDuration)} 
+                      ₹{selectedVehicle.price} 
                     </p>
                   </div>
                   <button

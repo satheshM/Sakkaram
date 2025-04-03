@@ -96,13 +96,14 @@ const updatePaymentStatus = async (orderId, updates) => {
           .eq("user_id", bookings.owner_id);
     
         if (ownerWalletUptError) throw new Error("Failed to update owner wallet balances");
-        // Record Transaction
+        // Record Owner Transaction
         const {error: ownertransUpdateError}=await supabase.from("transactions").insert({
           wallet_id: ownerwallet.id,
           type: "deposit",
           amount:bookings.totalPrice,
           reference_id: `earning_${Date.now()}`,
           status: "Success",
+          booking_id:paymentData.booking_id
         });
   
         if (ownertransUpdateError) throw new Error("Failed to update owner transaction  update"+JSON.stringify(ownertransUpdateError));
