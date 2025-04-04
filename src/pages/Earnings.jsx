@@ -1,8 +1,8 @@
 import React, { useState,useEffect } from "react";
 import { FaChartLine, FaCalendarAlt, FaTractor, FaWallet, FaDownload, FaExclamationCircle } from "react-icons/fa";
-import {getOwnerTransactions} from '../api/earnings'
+import {getOwnerTransactions,GetEarningDetails} from '../api/earnings'
 const Earnings = () => {
-  // Sample Earnings Data
+  //Sample Earnings Data
   const [earnings, setEarnings] = useState({
     totalEarnings: 15000, // Total earnings in ₹
     pendingEarnings: 5000, // Amount not yet withdrawn
@@ -19,6 +19,20 @@ const Earnings = () => {
       { id: 2, name: "John Deere Harvester", earnings: 7000, bookings: 6 },
     ]
   });
+
+  // const [earnings, setEarnings] = useState({
+  //   totalEarnings: 4180.95, // Total earnings in ₹
+  //   pendingEarnings: 4180.95, // Amount not yet withdrawn
+  //   withdrawnAmount: 0, // Already withdrawn
+  //   monthlyEarnings: [
+  //     { month: "Apr", amount: 4180.95 }
+  //   ],
+  //   vehiclePerformance: [
+  //     { id: "dc9acfb0-7315-41b9-90f3-48f8d065f8e1", name: "Johndeer123", earnings: 1158.07, bookings: 1 },
+  //     { id: "8c75298b-f536-48f7-b053-e49fb6aa91aa", name: "Mahindra 575", earnings: 3022.88, bookings: 1 }
+  //   ]
+  // });
+  
 
   // Sample Transaction History
   const [transactions, setTransactions] = useState([
@@ -72,7 +86,7 @@ const Earnings = () => {
 // fetch transaction from API
 
  useEffect(() => {
-    const fetchOwnerTransactions = async () => {
+    const fetchEarningsData = async () => {
       try {
         const response = await getOwnerTransactions();
 
@@ -86,9 +100,24 @@ const Earnings = () => {
       } catch (error) {
         console.error('Error fetching Owner Transactions:', error);
       }
+
+      try {
+        const response = await GetEarningDetails();
+
+        if (response.status === 200) {
+          const earningsData = await response.json();
+          setEarnings(earningsData.EarningDetails)
+
+         
+        } else {
+          console.log('failed to fetch Owner EarningDetails');
+        }
+      } catch (error) {
+        console.error('Error fetching Owner EarningDetails:', error);
+      }
     };
 
-    fetchOwnerTransactions();
+    fetchEarningsData();
   }, []);
 
 
@@ -260,11 +289,34 @@ const Earnings = () => {
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
-                  {earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount > earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount ? (
+                  {/* {earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount > earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount ? (
                     <span className="text-green-600">↑ {Math.round(((earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount - earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) / earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) * 100)}% from last month</span>
                   ) : (
                     <span className="text-red-600">↓ {Math.round(((earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount - earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount) / earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) * 100)}% from last month</span>
-                  )}
+                  )} */}
+                  {earnings.monthlyEarnings.length > 1 ? (
+  earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount >
+  earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount ? (
+    <span className="text-green-600">
+      ↑ {Math.round(
+        ((earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount -
+          earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) /
+          earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) * 100
+      )}% from last month
+    </span>
+  ) : (
+    <span className="text-red-600">
+      ↓ {Math.round(
+        ((earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount -
+          earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount) /
+          earnings.monthlyEarnings[earnings.monthlyEarnings.length - 2].amount) * 100
+      )}% from last month
+    </span>
+  )
+) : (
+  <span className="text-gray-600">No previous data to compare</span>
+)}
+
                 </div>
               </div>
             </div>

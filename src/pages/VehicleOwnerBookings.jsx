@@ -69,7 +69,7 @@ const VehicleOwnerBookings = () => {
   const totalHours = hours + minutes / 60;
   
       // Calculate the total amount
-      const amount = totalHours * CurrentBooking.pricePerHour;
+      const amount = Math.floor(totalHours * CurrentBooking.pricePerHour);
       console.log(CurrentBooking)
       setTotalAmount(amount);
     };
@@ -97,7 +97,7 @@ const VehicleOwnerBookings = () => {
     date: booking.bookingDate, // Use `bookingDate` for the date
     time:`${booking.total_hours} hour(s)` || 0, // Show duration as time
     location: booking.location, // Location remains the same
-    //price: booking.totalPrice, // Use total price
+    Totalprice: booking.totalPrice|| 0, // Use total price
     rating: booking.rating || 0, // If rating exists, use it; otherwise, null
     feedback: booking.feedback || '', // If feedback exists, use it; otherwise, empty string
     image: booking.image, // Use the vehicle image
@@ -546,9 +546,9 @@ const confirmBooking = async (id) => {
 
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-xs text-gray-500">Amount</p>
+                      <p className="text-xs text-gray-500">Total Amount</p>
                       <p className="font-bold text-green-600">
-                        ₹{booking.pricePerHour.toLocaleString()}
+                        ₹{booking.Totalprice.toLocaleString()}
                       </p>
                     </div>
 
