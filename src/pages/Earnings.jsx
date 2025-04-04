@@ -285,7 +285,7 @@ const Earnings = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">This Month</p>
-                    <p className="text-2xl font-bold">₹{earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">₹{earnings.monthlyEarnings.length  !== 0?earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1]?.amount.toLocaleString():0}</p>
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -553,7 +553,7 @@ const Earnings = () => {
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">Average Per Booking</p>
-                  <p className="text-xl font-bold text-gray-900">₹{Math.round(earnings.totalEarnings / earnings.vehiclePerformance.reduce((sum, v) => sum + v.bookings, 0)).toLocaleString()}</p>
+                  <p className="text-xl font-bold text-gray-900">₹{(earnings.monthlyEarnings.length !== 0)?Math.round(earnings.totalEarnings / earnings.vehiclePerformance.reduce((sum, v) => sum + v.bookings, 0)).toLocaleString():0}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">Total Bookings</p>
