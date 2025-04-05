@@ -1,24 +1,24 @@
 import React, { useState,useEffect } from "react";
 import { FaChartLine, FaCalendarAlt, FaTractor, FaWallet, FaDownload, FaExclamationCircle } from "react-icons/fa";
-import {getOwnerTransactions,GetEarningDetails} from '../api/earnings'
+import {getOwnerTransactions,GetEarningDetails,OwnerWithdrawn} from '../api/earnings'
 const Earnings = () => {
   //Sample Earnings Data
-  const [earnings, setEarnings] = useState({
-    totalEarnings: 15000, // Total earnings in ₹
-    pendingEarnings: 5000, // Amount not yet withdrawn
-    withdrawnAmount: 10000, // Already withdrawn
-    monthlyEarnings: [
-      { month: "Jan", amount: 2000 },
-      { month: "Feb", amount: 3000 },
-      { month: "Mar", amount: 5000 },
-      { month: "Apr", amount: 2500 },
-      { month: "May", amount: 2500 },
-    ],
-    vehiclePerformance: [
-      { id: 1, name: "Mahindra 575 DI Tractor", earnings: 8000, bookings: 16 },
-      { id: 2, name: "John Deere Harvester", earnings: 7000, bookings: 6 },
-    ]
-  });
+  // const [earnings, setEarnings] = useState({
+  //   totalEarnings: 15000, // Total earnings in ₹
+  //   pendingEarnings: 5000, // Amount not yet withdrawn
+  //   withdrawnAmount: 10000, // Already withdrawn
+  //   monthlyEarnings: [
+  //     { month: "Jan", amount: 2000 },
+  //     { month: "Feb", amount: 3000 },
+  //     { month: "Mar", amount: 5000 },
+  //     { month: "Apr", amount: 2500 },
+  //     { month: "May", amount: 2500 },
+  //   ],
+  //   vehiclePerformance: [
+  //     { id: 1, name: "Mahindra 575 DI Tractor", earnings: 8000, bookings: 16 },
+  //     { id: 2, name: "John Deere Harvester", earnings: 7000, bookings: 6 },
+  //   ]
+  // });
 
   // const [earnings, setEarnings] = useState({
   //   totalEarnings: 4180.95, // Total earnings in ₹
@@ -35,53 +35,64 @@ const Earnings = () => {
   
 
   // Sample Transaction History
-  const [transactions, setTransactions] = useState([
-    { 
-      id: 1, 
-      date: "2025-03-10", 
-      amount: 3000, 
-      status: "Completed", 
-      type: "Withdrawal",
-      method: "Bank Transfer",
-      reference: "TXN123456789"
-    },
-    { 
-      id: 2, 
-      date: "2025-03-08", 
-      amount: 2000, 
-      status: "Completed", 
-      type: "Withdrawal",
-      method: "UPI",
-      reference: "UPI123456789"
-    },
-    { 
-      id: 3, 
-      date: "2025-03-05", 
-      amount: 5000, 
-      status: "Completed", 
-      type: "Withdrawal",
-      method: "Bank Transfer",
-      reference: "TXN987654321"
-    },
-    { 
-      id: 4, 
-      date: "2025-03-02", 
-      amount: 2500, 
-      status: "Completed", 
-      type: "Earning",
-      vehicle: "Mahindra 575 DI Tractor",
-      farmer: "Ramesh Kumar"
-    },
-    { 
-      id: 5, 
-      date: "2025-02-28", 
-      amount: 6000, 
-      status: "Completed", 
-      type: "Earning",
-      vehicle: "John Deere Harvester",
-      farmer: "Suresh Patel"
-    },
-  ]);
+  const [earnings, setEarnings] = useState(
+    {
+        totalEarnings: 0, // Total earnings in ₹
+        pendingEarnings: 0, // Amount not yet withdrawn
+        withdrawnAmount: 0, // Already withdrawn
+        monthlyEarnings: []
+        ,
+        vehiclePerformance: []
+      }
+  )
+  const [transactions, setTransactions] = useState([])
+  // const [transactions, setTransactions] = useState([
+  //   { 
+  //     id: 1, 
+  //     date: "2025-03-10", 
+  //     amount: 3000, 
+  //     status: "Completed", 
+  //     type: "Withdrawal",
+  //     method: "Bank Transfer",
+  //     reference: "TXN123456789"
+  //   },
+  //   { 
+  //     id: 2, 
+  //     date: "2025-03-08", 
+  //     amount: 2000, 
+  //     status: "Completed", 
+  //     type: "Withdrawal",
+  //     method: "UPI",
+  //     reference: "UPI123456789"
+  //   },
+  //   { 
+  //     id: 3, 
+  //     date: "2025-03-05", 
+  //     amount: 5000, 
+  //     status: "Completed", 
+  //     type: "Withdrawal",
+  //     method: "Bank Transfer",
+  //     reference: "TXN987654321"
+  //   },
+  //   { 
+  //     id: 4, 
+  //     date: "2025-03-02", 
+  //     amount: 2500, 
+  //     status: "Completed", 
+  //     type: "Earning",
+  //     vehicle: "Mahindra 575 DI Tractor",
+  //     farmer: "Ramesh Kumar"
+  //   },
+  //   { 
+  //     id: 5, 
+  //     date: "2025-02-28", 
+  //     amount: 6000, 
+  //     status: "Completed", 
+  //     type: "Earning",
+  //     vehicle: "John Deere Harvester",
+  //     farmer: "Suresh Patel"
+  //   },
+  // ]);
 
 // fetch transaction from API
 
@@ -141,7 +152,7 @@ const Earnings = () => {
   const [showWithdrawForm, setShowWithdrawForm] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async() => {
     const amount = parseFloat(withdrawAmount);
     if (amount <= 0 || isNaN(amount)) {
       setWithdrawMessage("Please enter a valid amount");
@@ -163,6 +174,35 @@ const Earnings = () => {
       return;
     }
     
+    try {
+
+      
+      let req = {
+        amount: amount,
+        withdrawMethod: withdrawMethod
+      };
+      
+      if (withdrawMethod === "upi") {
+        req.upiId = accountDetails.upiId;
+      } else if (withdrawMethod === "bank") {
+        req.accountNumber = accountDetails.accountNumber;
+        req.ifscCode = accountDetails.ifscCode;
+        req.accountName = accountDetails.accountName;
+      }
+      const response = await OwnerWithdrawn(req);
+
+      if (response.status === 200) {
+        // const earningsData = await response.json();
+        // setEarnings(earningsData.EarningDetails)
+
+       
+      } else {
+        console.log('Failed to withdrawn');
+      }
+    } catch (error) {
+      console.error('Failed to withdrawn', error);
+    }
+
     // Process withdrawal
     setEarnings({
       ...earnings,
@@ -197,13 +237,13 @@ const Earnings = () => {
   };
 
   // Calculate highest earning month
-  const highestEarningMonth = earnings.monthlyEarnings.reduce(
+  const highestEarningMonth = earnings?.monthlyEarnings.reduce(
     (max, month) => (month.amount > max.amount ? month : max),
     { month: "", amount: 0 }
   );
 
   // Calculate highest earning vehicle
-  const highestEarningVehicle = earnings.vehiclePerformance.reduce(
+  const highestEarningVehicle = earnings?.vehiclePerformance.reduce(
     (max, vehicle) => (vehicle.earnings > max.earnings ? vehicle : max),
     { name: "", earnings: 0 }
   );
@@ -249,7 +289,7 @@ const Earnings = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Total Earnings</p>
-                    <p className="text-2xl font-bold">₹{earnings.totalEarnings.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">₹{earnings?.totalEarnings.toLocaleString()}</p>
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -264,7 +304,7 @@ const Earnings = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Available Balance</p>
-                    <p className="text-2xl font-bold">₹{earnings.pendingEarnings.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">₹{earnings?.pendingEarnings.toLocaleString()}</p>
                   </div>
                 </div>
                 <button 
@@ -285,7 +325,7 @@ const Earnings = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">This Month</p>
-                    <p className="text-2xl font-bold">₹{earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1].amount.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">₹{earnings?.monthlyEarnings.length  !== 0?earnings.monthlyEarnings[earnings.monthlyEarnings.length - 1]?.amount.toLocaleString():0}</p>
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
@@ -553,7 +593,7 @@ const Earnings = () => {
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">Average Per Booking</p>
-                  <p className="text-xl font-bold text-gray-900">₹{Math.round(earnings.totalEarnings / earnings.vehiclePerformance.reduce((sum, v) => sum + v.bookings, 0)).toLocaleString()}</p>
+                  <p className="text-xl font-bold text-gray-900">₹{(earnings.monthlyEarnings.length !== 0)?Math.round(earnings.totalEarnings / earnings.vehiclePerformance.reduce((sum, v) => sum + v.bookings, 0)).toLocaleString():0}</p>
                 </div>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">Total Bookings</p>
@@ -765,6 +805,7 @@ const Earnings = () => {
                   placeholder="example@upi"
                   value={accountDetails.upiId}
                   onChange={(e) => setAccountDetails({...accountDetails, upiId: e.target.value})}
+                  required
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
               </div>
