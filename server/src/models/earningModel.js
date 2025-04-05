@@ -198,7 +198,7 @@
 
 
 
-const supabase = require('../config/db');
+
 
 // const findOwnerTransactions = async (userId) => {
 //     try {
@@ -306,7 +306,8 @@ const supabase = require('../config/db');
 //     }
 // };
 
-
+const supabase = require('../config/db');
+const { v4: uuidv4 } = require('uuid');
 const findOwnerTransactions = async (userId) => {
   try {
       // 🟢 Step 1: Get Wallet ID
@@ -332,6 +333,7 @@ const findOwnerTransactions = async (userId) => {
               status,
               type,
               reference_id,
+              method,
               bookings:booking_id (
                   id,
                   vehicle:vehicleId (
@@ -356,13 +358,13 @@ const findOwnerTransactions = async (userId) => {
           amount: txn.amount,
           status: txn.status,
           type: txn.type === 'deposit' ? 'Earning' : 'Withdrawal',
-          method: null, // method is not present in the schema
+          method: txn.method, // method is not present in the schema
           reference: txn.reference_id,
           vehicle: txn.bookings?.vehicle?.model || null,
           farmer: txn.bookings?.farmer?.name || null
       }));
 
-      
+     
       // 🟢 Step 4: Return Final Response
       return { data: transactions };
   } catch (err) {
@@ -499,24 +501,28 @@ const fetchOwnerEarnings = async (userId) => {
 
         if (earningsError) throw new Error(earningsError.message);
 
-        // 🟢 Step 2: Fetch Withdrawn Amount
-        const { data: withdrawnData, error: withdrawnError } = await supabase
-            .from('transactions')
-            .select('amount')
-            .eq('wallet_id', userId)
-            .eq('type', 'Withdraw')
-            .eq('status', 'Success');
+        
 
-        if (withdrawnError) throw new Error(withdrawnError.message);
-
-        // 🟢 Step 3: Fetch Pending Balance from Wallets Table
+        // 🟢 Step 2: Fetch Pending Balance from Wallets Table
         const { data: walletData, error: walletError } = await supabase
             .from('wallets')
-            .select('balance')
+            .select('balance,id')
             .eq('user_id', userId)
             .single();
 
         if (walletError) throw new Error(walletError.message);
+
+        // 🟢 Step 3: Fetch Withdrawn Amount
+        const { data: withdrawnData, error: withdrawnError } = await supabase
+            .from('transactions')
+            .select('amount')
+            .eq('wallet_id', walletData.id)
+            .eq('type', 'withdraw')
+            .eq('status', 'Success');
+
+        if (withdrawnError) throw new Error(withdrawnError.message);
+
+      
 
         // 🟢 Step 4: Calculate Totals
         let totalEarnings = 0;
@@ -529,6 +535,8 @@ const fetchOwnerEarnings = async (userId) => {
         withdrawnData.forEach((t) => {
             withdrawnAmount += t.amount;
         });
+
+       
 
         // Calculate Monthly Earnings & Vehicle Performance
         earningsData.forEach((payment) => {
@@ -581,6 +589,78 @@ const fetchOwnerEarnings = async (userId) => {
 };
 
 
+const OwnerWithdrawn =async (userId,req) => {
+   // const { userId } = req; // Get this from auth middleware or session
+    const {amount,  withdrawMethod, upiId } = req;
+   
+
+  
+    // 🔐 Basic Validation
+    if (!amount || isNaN(amount) || amount <= 0) {
+     
+      throw new Error("invalid amount"+req.amount);
+    }
+  
+    if (withdrawMethod !== 'upi' && withdrawMethod !== 'bank') {
+      throw new Error('Unsupported withdraw method');
+    }
+  
+    if (!upiId) {
+      throw new Error('UPI ID is required')
+    }
+  
+    try {
+      // 🏦 Step 1: Check Wallet Balance
+      const { data: wallet, error: walletError } = await supabase
+        .from('wallets')
+        .select('id, balance')
+        .eq('user_id', userId)
+        .single();
+  
+      if (walletError || !wallet) {
+        throw new Error('Wallet not found');
+      }
+  
+      if (wallet.balance < amount) {
+        throw new Error('Insufficient balance' );
+      }
+  
+      // 💳 Step 2: Create Withdraw Transaction
+      const { error: transactionError } = await supabase
+        .from('transactions')
+        .insert([
+          {
+            wallet_id: wallet.id,
+            amount: Number(amount),
+            type: 'withdraw',
+            method:withdrawMethod,
+            reference_id:`withdraw_${uuidv4()}`,
+            status: 'Success', // or 'Success' if instant
+          }
+        ]);
+  
+      if (transactionError) {
+        throw transactionError;
+      }
+  
+      // 💰 Step 3: Update Wallet Balance
+      const { error: updateError } = await supabase
+        .from('wallets')
+        .update({ balance: wallet.balance - amount })
+        .eq('id', wallet.id);
+  
+      if (updateError) {
+        throw updateError;
+      }
+  
+      return ({ message: 'Withdrawal requested successfully' });
+    } catch (err) {
+      console.error('Withdraw Error:', err.message);
+      return ({ success: false, message: err.message });
+    }
+  }
 
 
-module.exports = { findOwnerTransactions,fetchOwnerEarnings };
+
+
+module.exports = { findOwnerTransactions,fetchOwnerEarnings,OwnerWithdrawn };

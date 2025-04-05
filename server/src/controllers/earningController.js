@@ -1,7 +1,7 @@
 
 
 
-const {findOwnerTransactions,fetchOwnerEarnings } = require('../models/earningModel');
+const {findOwnerTransactions,fetchOwnerEarnings,OwnerWithdrawn } = require('../models/earningModel');
 
 
 const getTransactions = async (req, res) => {
@@ -28,5 +28,17 @@ const earningDetails = async (req, res) => {
   }
 };
 
+const Withdrawn = async (req, res) => {
+  try {
+    const WithdrawnDetails = await OwnerWithdrawn(req.user.id,req.body);
+    if (!WithdrawnDetails) return res.status(404).json({ success: false, error: 'Failed to fetch Withdrawn Details' });
 
-module.exports = {getTransactions,earningDetails };
+  
+    res.json({ success: true, WithdrawnDetails: WithdrawnDetails });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to Withdraw'+error });
+  }
+};
+
+
+module.exports = {getTransactions,earningDetails,Withdrawn };
