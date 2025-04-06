@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from "react";
 import { FaChartLine, FaCalendarAlt, FaTractor, FaWallet, FaDownload, FaExclamationCircle } from "react-icons/fa";
 import {getOwnerTransactions,GetEarningDetails,OwnerWithdrawn} from '../api/earnings'
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 const Earnings = () => {
   //Sample Earnings Data
   // const [earnings, setEarnings] = useState({
@@ -132,8 +134,83 @@ const Earnings = () => {
   }, []);
 
 
+  
+const exportTransactionsAsPDF = (transactions) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
+  // ========== HEADER ==========
+  doc.setFontSize(18);
+  doc.setTextColor(40);
+  doc.setFont("helvetica", "bold");
+  doc.text("SAKKARAM", pageWidth / 2, 15, { align: "center" });
 
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text("Transaction History", pageWidth / 2, 23, { align: "center" });
+
+  // Optional: add watermark or background logo
+  // const img = new Image();
+  // img.src = "your-logo.png"; // PNG recommended; SVG support is limited
+  // doc.addImage(img, "PNG", pageWidth - 40, 5, 25, 10); // Right corner logo
+
+  // ========== TABLE ==========
+  const tableColumn = ["Date", "Type", "Details", "Amount", "Status"];
+  const tableRows = [];
+
+  transactions.forEach((txn) => {
+    const date = new Date(txn.date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    const details =
+      txn.type === "Withdrawal"
+        ? `Method: ${txn.method || "N/A"}\nRef: ${txn.reference || "N/A"}`
+        : `Vehicle: ${txn.vehicle || "N/A"}\nFarmer: ${txn.farmer || "N/A"}`;
+
+    const amount = `${txn.type === "Earning" ? "+" : "-"} ₹${txn.amount.toLocaleString("en-IN")}`;
+    const status = txn.status === "Success" ? "Completed" : "Failed";
+
+    tableRows.push([date, txn.type, details, amount, status]);
+  });
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 30,
+    theme: "striped",
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+      overflow: "linebreak",
+    },
+    columnStyles: {
+      3: { halign: "right", fontStyle: "bold", font: "courier" }, // Amount alignment and monospaced
+    },
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+  });
+
+  // ========== FOOTER ==========
+  doc.setDrawColor(200);
+  doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20); // Footer separator
+
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.setFont("helvetica", "normal");
+
+  doc.text("abc Gate, Sakkaram Village, India - 635242", 14, pageHeight - 14);
+  doc.text("support@sakkaram.com | www.sakkaram.logo", 14, pageHeight - 8);
+
+  // ========== SAVE ==========
+  doc.save("transaction-history.pdf");
+};
 
 
 
@@ -515,9 +592,10 @@ const Earnings = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-semibold">Transaction History</h2>
-              <button className="flex items-center text-green-600 text-sm hover:underline">
+              <button
+              onClick={() => exportTransactionsAsPDF(transactions)} className="flex items-center text-green-600 text-sm hover:underline">
                 <FaDownload className="mr-1" />
-                Export CSV
+                Download
               </button>
             </div>
             
