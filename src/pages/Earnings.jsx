@@ -1,6 +1,10 @@
 import React, { useState,useEffect } from "react";
 import { FaChartLine, FaCalendarAlt, FaTractor, FaWallet, FaDownload, FaExclamationCircle } from "react-icons/fa";
 import {getOwnerTransactions,GetEarningDetails,OwnerWithdrawn} from '../api/earnings'
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import MonthlyEarningsChart from "../components/charts/MonthlyEarningsChart";
+import VehiclePerformanceBarChart from '../components/charts/VehiclePerformanceBarChart';
 const Earnings = () => {
   //Sample Earnings Data
   // const [earnings, setEarnings] = useState({
@@ -132,8 +136,83 @@ const Earnings = () => {
   }, []);
 
 
+  
+const exportTransactionsAsPDF = (transactions) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
+  // ========== HEADER ==========
+  doc.setFontSize(18);
+  doc.setTextColor(40);
+  doc.setFont("helvetica", "bold");
+  doc.text("SAKKARAM", pageWidth / 2, 15, { align: "center" });
 
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text("Transaction History", pageWidth / 2, 23, { align: "center" });
+
+  // Optional: add watermark or background logo
+  // const img = new Image();
+  // img.src = "your-logo.png"; // PNG recommended; SVG support is limited
+  // doc.addImage(img, "PNG", pageWidth - 40, 5, 25, 10); // Right corner logo
+
+  // ========== TABLE ==========
+  const tableColumn = ["Date", "Type", "Details", "Amount", "Status"];
+  const tableRows = [];
+
+  transactions.forEach((txn) => {
+    const date = new Date(txn.date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+    const details =
+      txn.type === "Withdrawal"
+        ? `Method: ${txn.method || "N/A"}\nRef: ${txn.reference || "N/A"}`
+        : `Vehicle: ${txn.vehicle || "N/A"}\nFarmer: ${txn.farmer || "N/A"}`;
+
+    const amount = `${txn.type === "Earning" ? "+" : "-"} ₹${txn.amount.toLocaleString("en-IN")}`;
+    const status = txn.status === "Success" ? "Completed" : "Failed";
+
+    tableRows.push([date, txn.type, details, amount, status]);
+  });
+
+  autoTable(doc, {
+    head: [tableColumn],
+    body: tableRows,
+    startY: 30,
+    theme: "striped",
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+      overflow: "linebreak",
+    },
+    columnStyles: {
+      3: { halign: "right", fontStyle: "bold", font: "courier" }, // Amount alignment and monospaced
+    },
+    headStyles: {
+      fillColor: [22, 160, 133],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+  });
+
+  // ========== FOOTER ==========
+  doc.setDrawColor(200);
+  doc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20); // Footer separator
+
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.setFont("helvetica", "normal");
+
+  doc.text("abc Gate, Sakkaram Village, India - 635242", 14, pageHeight - 14);
+  doc.text("support@sakkaram.com | www.sakkaram.logo", 14, pageHeight - 8);
+
+  // ========== SAVE ==========
+  doc.save("transaction-history.pdf");
+};
 
 
 
@@ -385,36 +464,7 @@ const Earnings = () => {
 
 <div className="bg-white p-6 rounded-lg shadow-md mb-6">
   <h2 className="text-lg font-semibold mb-4">Monthly Earnings</h2>
-  <div className="h-64 flex items-end justify-between px-2 gap-4">
-    {earnings.monthlyEarnings.map((month, index) => {
-      const percentage = (month.amount / highestEarningMonth.amount) * 100;
-      const isHighest = month.month === highestEarningMonth.month;
-
-      return (
-        <div key={index} className="flex flex-col items-center group">
-          {/* Bar with Gradient and Hover Effects */}
-          <div 
-            className={`w-10 rounded-t-md transition-all duration-300 ${
-              isHighest ? "bg-gradient-to-b from-green-500 to-green-700" : "bg-gradient-to-b from-green-300 to-green-500"
-            } group-hover:scale-105`}
-            style={{ height: `${percentage}%`, minHeight: '20px' }}
-          >
-            <span className="hidden group-hover:block text-white text-sm font-bold mt-1">
-              ₹{month.amount.toLocaleString()}
-            </span>
-          </div>
-
-          {/* Month Label */}
-          <div className="text-sm font-medium mt-2 text-gray-600">{month.month}</div>
-          
-          {/* Amount on hover */}
-          <div className={`text-sm font-semibold ${isHighest ? "text-green-600" : "text-gray-700"}`}>
-            ₹{month.amount.toLocaleString()}
-          </div>
-        </div>
-      );
-    })}
-  </div>
+ <MonthlyEarningsChart data={earnings.monthlyEarnings} />
 </div>
 
             
@@ -478,7 +528,8 @@ const Earnings = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {transactions.slice(0, 5).map((txn) => (
+                  {[...transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5).map((txn) => (
+
                       <tr key={txn.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">{new Date(txn.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
@@ -515,9 +566,10 @@ const Earnings = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-lg font-semibold">Transaction History</h2>
-              <button className="flex items-center text-green-600 text-sm hover:underline">
+              <button
+              onClick={() => exportTransactionsAsPDF(transactions)} className="flex items-center text-green-600 text-sm hover:underline">
                 <FaDownload className="mr-1" />
-                Export CSV
+                Download
               </button>
             </div>
             
@@ -533,7 +585,9 @@ const Earnings = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {transactions.map((txn) => (
+                {[...transactions]
+  .sort((a, b) => new Date(b.date) - new Date(a.date))
+  .map((txn) => (
                     <tr key={txn.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{new Date(txn.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
@@ -602,64 +656,13 @@ const Earnings = () => {
               </div>
             </div>
             
-            {/* Earnings Breakdown */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold mb-4">Earnings Breakdown by Vehicle</h2>
-              <div className="h-64 mb-6">
-                {/* Simple visualization of earnings by vehicle */}
-                <div className="h-full flex items-end">
-                  {earnings.vehiclePerformance.map((vehicle, index) => {
-                    const percentage = (vehicle.earnings / earnings.totalEarnings) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center">
-                        <div className="w-full text-center text-xs mb-2">
-                          {Math.round(percentage)}%
-                        </div>
-                        <div 
-                          className={`w-4/5 bg-green-500 rounded-t-md ${
-                            vehicle.name === highestEarningVehicle.name ? 'bg-green-600' : ''
-                          }`} 
-                          style={{ height: `${percentage}%` }}
-                        ></div>
-                        <div className="w-full text-center text-xs mt-2 truncate">
-                          {vehicle.name.split(' ')[0]}
-                        </div>
-                        <div className="w-full text-center text-xs font-semibold">
-                          ₹{vehicle.earnings.toLocaleString()}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+           
               
-              <h2 className="text-lg font-semibold mb-4">Booking Frequency by Vehicle</h2>
-              <div className="h-64">
-                {/* Simple visualization of bookings by vehicle */}
-                <div className="h-full flex items-end">
-                  {earnings.vehiclePerformance.map((vehicle, index) => {
-                    const maxBookings = Math.max(...earnings.vehiclePerformance.map(v => v.bookings));
-                    const percentage = (vehicle.bookings / maxBookings) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center">
-                        <div className="w-full text-center text-xs mb-2">
-                          {vehicle.bookings} bookings
-                        </div>
-                        <div 
-                          className={`w-4/5 bg-blue-500 rounded-t-md ${
-                            vehicle.bookings === maxBookings ? 'bg-blue-600' : ''
-                          }`} 
-                          style={{ height: `${percentage}%` }}
-                        ></div>
-                        <div className="w-full text-center text-xs mt-2 truncate">
-                          {vehicle.name.split(' ')[0]}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+              {/* Booking Frequency by Vehicle */}
+<div className="bg-white p-6 rounded-lg shadow-md">
+  <VehiclePerformanceBarChart data={earnings.vehiclePerformance} />
+</div>
+            
             
             {/* Insights */}
             <div className="bg-white p-6 rounded-lg shadow-md">
