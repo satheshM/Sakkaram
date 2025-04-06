@@ -605,9 +605,9 @@ const OwnerWithdrawn =async (userId,req) => {
       throw new Error('Unsupported withdraw method');
     }
   
-    if (!upiId) {
-      throw new Error('UPI ID is required')
-    }
+    // if (!upiId) {
+    //   throw new Error('UPI ID is required')
+    // }
   
     try {
       // 🏦 Step 1: Check Wallet Balance
