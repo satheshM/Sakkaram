@@ -352,7 +352,9 @@ const findOwnerTransactions = async (userId) => {
      
 
       // 🟢 Step 3: Transform Data to Expected Format
-      const transactions = transactionsData.map(txn => ({
+      const transactions = transactionsData
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) // 🔥 Sort by newest date first
+      .map(txn => ({
           id: txn.id,
           date: txn.created_at,
           amount: txn.amount,
@@ -374,112 +376,6 @@ const findOwnerTransactions = async (userId) => {
 };
 
 
-// const fetchOwnerEarnings = async (userId) => {
-//   try {
-//       // 🟢 Step 1: Fetch Earnings Data
-//       const { data: earningsData, error: earningsError } = await supabase
-//           .from('payments')
-//           .select(`
-//               amount,
-//               status,
-//               created_at,
-//               bookings (
-//                   vehicleId,
-//                   vehicles:vehicleId (
-//                       model
-//                   )
-//               )
-//           `)
-//           .eq('bookings.owner_id', userId);
-
-//       if (earningsError) throw new Error(earningsError.message);
-
-//       // 🟢 Step 2: Fetch Withdrawn Amount
-//       const { data: withdrawnData, error: withdrawnError } = await supabase
-//           .from('transactions')
-//           .select('amount')
-//           .eq('wallet_id', userId)
-//           .eq('type', 'Withdraw')
-//           .eq('status', 'Success');
-
-//       if (withdrawnError) throw new Error(withdrawnError.message);
-
-//       // 🟢 Step 3: Calculate Totals
-//       let totalEarnings = 0;
-//       let pendingEarnings = 0;
-//       let withdrawnAmount = 0;
-//       const monthlyEarnings = {};
-//       const vehiclePerformance = {};
-
-//       // Calculate Withdrawn Amount
-//       withdrawnData.forEach((t) => {
-//           withdrawnAmount += t.amount;
-//       });
-
-//       // Calculate Earnings
-//       earningsData.forEach((payment) => {
-//           const { amount, status, created_at, bookings } = payment;
-
-//           // Earnings calculations
-//           if (status === 'Success') {
-//               totalEarnings += amount;
-              
-//               // Highest Earning Month
-//               const month = new Date(created_at).toLocaleString('default', { month: 'long' });
-//               monthlyEarnings[month] = (monthlyEarnings[month] || 0) + amount;
-
-//               // Vehicle Performance
-//               const vehicleName = bookings?.vehicles?.model;
-//               if (vehicleName) {
-//                   if (!vehiclePerformance[vehicleName]) {
-//                       vehiclePerformance[vehicleName] = { earnings: 0, bookings: 0 };
-//                   }
-//                   vehiclePerformance[vehicleName].earnings += amount;
-//                   vehiclePerformance[vehicleName].bookings += 1;
-//               }
-//           }
-
-//           // Pending Earnings
-//           if (status === 'Pending') {
-//               pendingEarnings += amount;
-//           }
-//       });
-
-//       // 🟢 Step 4: Find Highest Earning Month & Vehicle
-//       const highestEarningMonth = Object.entries(monthlyEarnings)
-//           .reduce((acc, [month, earnings]) => {
-//               return earnings > acc.amount ? { month, amount: earnings } : acc;
-//           }, { month: null, amount: 0 });
-
-//       const highestEarningVehicle = Object.entries(vehiclePerformance)
-//           .reduce((acc, [name, { earnings }]) => {
-//               return earnings > acc.earnings ? { name, earnings } : acc;
-//           }, { name: null, earnings: 0 });
-
-//       // 🟢 Step 5: Format Vehicle Performance Data
-//       const formattedVehiclePerformance = Object.entries(vehiclePerformance).map(([name, { earnings, bookings }]) => ({
-//           name,
-//           earnings,
-//           bookings
-//       }));
-
-//       // 🟢 Step 6: Return Final Response
-//       return {
-//           success: true,
-//           data: {
-//               totalEarnings,
-//               pendingEarnings,
-//               withdrawnAmount,
-//               highestEarningMonth,
-//               highestEarningVehicle,
-//               vehiclePerformance: formattedVehiclePerformance
-//           }
-//       };
-//   } catch (err) {
-//       console.error("Error fetching earnings:", err);
-//       return { success: false, error: err.message };
-//   }
-// };
 
 const fetchOwnerEarnings = async (userId) => {
     try {
