@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { FaTractor, FaCalendarCheck, FaWallet, FaChartLine } from "react-icons/fa";
+import WeatherForecast from "../components/WeatherForecast"
 
 const Home = () => {
   const { user } = useAuth();
@@ -98,7 +99,7 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        {/* <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Weather Forecast</h2>
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
@@ -132,7 +133,10 @@ const Home = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
+
+
+        <WeatherForecast/>
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-md">
